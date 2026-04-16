@@ -1,0 +1,11 @@
+Contenido;Sólo los resultados
+Exportar resultados;Verdadero
+Área de ensayo;Bajo la cruceta
+Umbral;"10,00000";N
+Retirar extensómetro durante el ensayo;Falso
+
+Tabla de resultados 1
+;Etiqueta de la probeta;Maximum Load;Maximum Extension;Relaxation Energy ;Relaxation Load ;Comment
+;;(N);(mm);(J);(N);
+1;"";"231,80367";"3,70";;;""
+

@@ -1,0 +1,5 @@
+--- REPORTE DE AJUSTE LINEAL ---
+Archivo analizado: Specimen_RawData_1_procesado.txt
+Pendiente (Modulo E): 50.6149 kPa
+Coeficiente R2: 0.974637
+Numero de puntos usados: 4724
