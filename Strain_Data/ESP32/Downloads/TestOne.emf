@@ -1,0 +1,665 @@
+{
+  "version": "1.00",
+  "projectName": "",
+  "author": "Usuario",
+  "items": [
+    {
+      "parentId": 0,
+      "type": "subMenu",
+      "item": {
+        "secured": false,
+        "name": "Mover",
+        "variableName": "Mover",
+        "id": 1,
+        "eepromAddress": -1,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 1,
+      "type": "actionMenu",
+      "item": {
+        "name": "Home",
+        "variableName": "Home",
+        "id": 2,
+        "eepromAddress": -1,
+        "functionName": "homing",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 1,
+      "type": "actionMenu",
+      "item": {
+        "name": "Subir",
+        "variableName": "Subir",
+        "id": 3,
+        "eepromAddress": -1,
+        "functionName": "up",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 1,
+      "type": "actionMenu",
+      "item": {
+        "name": "Bajar",
+        "variableName": "Bajar",
+        "id": 4,
+        "eepromAddress": -1,
+        "functionName": "down",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 0,
+      "type": "subMenu",
+      "item": {
+        "secured": false,
+        "name": "Configurar",
+        "variableName": "Configurar",
+        "id": 5,
+        "eepromAddress": -1,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 5,
+      "type": "analogItem",
+      "defaultValue": "45",
+      "item": {
+        "maxValue": 45,
+        "offset": 5,
+        "divisor": 10,
+        "unitName": "mm",
+        "step": 1,
+        "name": "Gap",
+        "variableName": "Posicion",
+        "id": 15,
+        "eepromAddress": 12,
+        "functionName": "poschanged",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 5,
+      "type": "subMenu",
+      "item": {
+        "secured": false,
+        "name": "Motores",
+        "variableName": "Motores",
+        "id": 16,
+        "eepromAddress": -1,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 16,
+      "type": "subMenu",
+      "item": {
+        "secured": false,
+        "name": "Pulsation",
+        "variableName": "Pulsation",
+        "id": 26,
+        "eepromAddress": -1,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 26,
+      "type": "boolItem",
+      "defaultValue": "false",
+      "item": {
+        "naming": "ON_OFF",
+        "name": "Pulse",
+        "variableName": "Pulse",
+        "id": 23,
+        "eepromAddress": 26,
+        "functionName": "pulseChanged",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 26,
+      "type": "analogItem",
+      "defaultValue": "0",
+      "item": {
+        "maxValue": 40,
+        "offset": 10,
+        "divisor": 1,
+        "unitName": " RPM",
+        "step": 1,
+        "name": "Amplitude",
+        "variableName": "Amplitude",
+        "id": 24,
+        "eepromAddress": 27,
+        "functionName": "amplitudeChanged",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 26,
+      "type": "analogItem",
+      "defaultValue": "0",
+      "item": {
+        "maxValue": 8,
+        "offset": 2,
+        "divisor": 1,
+        "unitName": " Sec",
+        "step": 1,
+        "name": "Period",
+        "variableName": "Period",
+        "id": 27,
+        "eepromAddress": 29,
+        "functionName": "periodChanged",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 16,
+      "type": "subMenu",
+      "item": {
+        "secured": false,
+        "name": "RPM",
+        "variableName": "RPMsubmenu",
+        "id": 25,
+        "eepromAddress": -1,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 25,
+      "type": "analogItem",
+      "defaultValue": "0",
+      "item": {
+        "maxValue": 275,
+        "offset": 25,
+        "divisor": 1,
+        "unitName": " RPM",
+        "step": 1,
+        "name": "All",
+        "variableName": "Motor",
+        "id": 6,
+        "eepromAddress": 10,
+        "functionName": "setRPM",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 25,
+      "type": "analogItem",
+      "defaultValue": "0",
+      "item": {
+        "maxValue": 275,
+        "offset": 25,
+        "divisor": 1,
+        "unitName": " RPM",
+        "step": 1,
+        "name": "M1",
+        "variableName": "M1_RPM",
+        "id": 17,
+        "eepromAddress": 14,
+        "functionName": "M1Changed",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 25,
+      "type": "analogItem",
+      "defaultValue": "0",
+      "item": {
+        "maxValue": 275,
+        "offset": 25,
+        "divisor": 1,
+        "unitName": " RPM",
+        "step": 1,
+        "name": "M2",
+        "variableName": "M2_RPM",
+        "id": 18,
+        "eepromAddress": 16,
+        "functionName": "M2Changed",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 25,
+      "type": "analogItem",
+      "defaultValue": "0",
+      "item": {
+        "maxValue": 275,
+        "offset": 25,
+        "divisor": 1,
+        "unitName": " RPM",
+        "step": 1,
+        "name": "M3",
+        "variableName": "M3_RPM",
+        "id": 19,
+        "eepromAddress": 18,
+        "functionName": "M3Changed",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 25,
+      "type": "analogItem",
+      "defaultValue": "0",
+      "item": {
+        "maxValue": 275,
+        "offset": 25,
+        "divisor": 1,
+        "unitName": " RPM",
+        "step": 1,
+        "name": "M4",
+        "variableName": "M4_RPM",
+        "id": 20,
+        "eepromAddress": 20,
+        "functionName": "M4Changed",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 25,
+      "type": "analogItem",
+      "defaultValue": "0",
+      "item": {
+        "maxValue": 275,
+        "offset": 25,
+        "divisor": 1,
+        "unitName": " RPM",
+        "step": 1,
+        "name": "M5",
+        "variableName": "M5_RPM",
+        "id": 21,
+        "eepromAddress": 22,
+        "functionName": "M5Changed",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 25,
+      "type": "analogItem",
+      "defaultValue": "0",
+      "item": {
+        "maxValue": 275,
+        "offset": 25,
+        "divisor": 1,
+        "unitName": " RPM",
+        "step": 1,
+        "name": "M6",
+        "variableName": "M6_RPM",
+        "id": 22,
+        "eepromAddress": 24,
+        "functionName": "M6Changed",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 0,
+      "type": "subMenu",
+      "item": {
+        "secured": false,
+        "name": "Run",
+        "variableName": "Run",
+        "id": 7,
+        "eepromAddress": -1,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 7,
+      "type": "boolItem",
+      "defaultValue": "false",
+      "item": {
+        "naming": "ON_OFF",
+        "name": "Status",
+        "variableName": "Status",
+        "id": 8,
+        "eepromAddress": -1,
+        "functionName": "statusOnChange",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": true
+      }
+    },
+    {
+      "parentId": 7,
+      "type": "analogItem",
+      "defaultValue": "0",
+      "item": {
+        "maxValue": 310,
+        "offset": 0,
+        "divisor": 1,
+        "unitName": " RPM",
+        "step": 1,
+        "name": "M1",
+        "variableName": "M1",
+        "id": 10,
+        "eepromAddress": -1,
+        "readOnly": true,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 7,
+      "type": "analogItem",
+      "defaultValue": "0",
+      "item": {
+        "maxValue": 310,
+        "offset": 0,
+        "divisor": 1,
+        "unitName": " RPM",
+        "step": 1,
+        "name": "M2",
+        "variableName": "M2",
+        "id": 9,
+        "eepromAddress": -1,
+        "readOnly": true,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 7,
+      "type": "analogItem",
+      "defaultValue": "0",
+      "item": {
+        "maxValue": 310,
+        "offset": 0,
+        "divisor": 1,
+        "unitName": " RPM",
+        "step": 1,
+        "name": "M3",
+        "variableName": "M3",
+        "id": 11,
+        "eepromAddress": -1,
+        "readOnly": true,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 7,
+      "type": "analogItem",
+      "defaultValue": "0",
+      "item": {
+        "maxValue": 310,
+        "offset": 0,
+        "divisor": 1,
+        "unitName": " RPM",
+        "step": 1,
+        "name": "M4",
+        "variableName": "M4",
+        "id": 12,
+        "eepromAddress": -1,
+        "readOnly": true,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 7,
+      "type": "analogItem",
+      "defaultValue": "0",
+      "item": {
+        "maxValue": 310,
+        "offset": 0,
+        "divisor": 1,
+        "unitName": " RPM",
+        "step": 1,
+        "name": "M5",
+        "variableName": "M5",
+        "id": 13,
+        "eepromAddress": -1,
+        "readOnly": true,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 7,
+      "type": "analogItem",
+      "defaultValue": "0",
+      "item": {
+        "maxValue": 310,
+        "offset": 0,
+        "divisor": 1,
+        "unitName": " RPM",
+        "step": 1,
+        "name": "M6",
+        "variableName": "M6",
+        "id": 14,
+        "eepromAddress": -1,
+        "readOnly": true,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    }
+  ],
+  "codeOptions": {
+    "embeddedPlatform": "ARDUINO_ESP32",
+    "lastDisplayUuid": "fd998437-c4b2-4386-ba88-d0ae7c20620b",
+    "lastInputUuid": "6dd87e7d-e751-4912-a70d-91793b1d3d87",
+    "lastRemoteUuids": [
+      "2c101fec-1f7d-4ff3-8d2b-992ad41e7fcb"
+    ],
+    "lastThemeUuid": "815316bb-76c9-436a-8f83-be0bced963df",
+    "applicationUUID": "c5fdfde7-8a64-4620-bc8d-b7026ceee414",
+    "applicationName": "VISCO",
+    "lastProperties": [
+      {
+        "name": "DISPLAY_VARIABLE",
+        "latestValue": "U8g2",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DISPLAY_TYPE",
+        "latestValue": "U8G2_SSD1306_128X64_NONAME_F_HW_I2C",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DISPLAY_ROTATION",
+        "latestValue": "U8G2_R0",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DISPLAY_CLOCK_PIN",
+        "latestValue": "22",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DISPLAY_DATA_PIN",
+        "latestValue": "21",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DISPLAY_RESET_PIN",
+        "latestValue": "U8X8_PIN_NONE",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DISPLAY_CS_PIN",
+        "latestValue": "U8X8_PIN_NONE",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DISPLAY_RS_PIN",
+        "latestValue": "U8X8_PIN_NONE",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "UPDATES_PER_SEC",
+        "latestValue": "10",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "YIELDING_WIRE_CB",
+        "latestValue": "false",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "USE_UTF8_SUPPORT",
+        "latestValue": "false",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "SW_POLLING_MODE",
+        "latestValue": "SWITCHES_NO_POLLING",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "SWITCH_IODEVICE",
+        "latestValue": "devicePins",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "ENCODER_PIN_A",
+        "latestValue": "35",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "ENCODER_PIN_B",
+        "latestValue": "34",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "ENCODER_PIN_OK",
+        "latestValue": "32",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "ENCODER_BACK_PIN",
+        "latestValue": "-1",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "ENCODER_NEXT_PIN",
+        "latestValue": "-1",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "PULLUP_LOGIC",
+        "latestValue": "true",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "ENCODER_IS_QUARTER_CYCLE",
+        "latestValue": "false",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "ITEM_FONT",
+        "latestValue": "def:,1",
+        "subsystem": "THEME"
+      },
+      {
+        "name": "TITLE_FONT",
+        "latestValue": "def:,1",
+        "subsystem": "THEME"
+      },
+      {
+        "name": "TITLE_BORDER_WIDTH",
+        "latestValue": "1",
+        "subsystem": "THEME"
+      },
+      {
+        "name": "TITLE_TO_ITEM_SPACING",
+        "latestValue": "2",
+        "subsystem": "THEME"
+      },
+      {
+        "name": "TITLE_SHOW_MODE",
+        "latestValue": "TITLE_FIRST_ROW",
+        "subsystem": "THEME"
+      },
+      {
+        "name": "USE_TC_UNICODE",
+        "latestValue": "false",
+        "subsystem": "THEME"
+      }
+    ],
+    "namingRecursive": false,
+    "useCppMain": false,
+    "saveLocation": "ALL_TO_CURRENT",
+    "usingSizedEEPROMStorage": true,
+    "eepromDefinition": "eeprom:",
+    "authenticatorDefinition": "",
+    "projectIoExpanders": [
+      "deviceIO:"
+    ],
+    "menuInMenuCollection": {
+      "menuDefinitions": []
+    },
+    "packageNamespace": "",
+    "appIsModular": false,
+    "listOfEmbeddedForms": []
+  },
+  "stringLists": []
+}
