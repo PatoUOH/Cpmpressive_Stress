@@ -42,20 +42,18 @@ Debo aplicar el modelo Demiray entonces para poder determinar el maximo esfuerzo
 
 clear; clc;
 
-%% --- PARAMETROS GEOMETRICOS ---
-L0_ctrl = 4.0;    % Longitud inicial UA_Control [mm]
-L0_fgr  = 4.0;    % Longitud inicial UA_FGR     [mm]
-A0_ctrl = 5.91;   % Area sección transversal UA_Control [mm^2]
-A0_fgr  = 5.64;   % Area sección transversal UA_FGR     [mm^2]
+L0_ctrl = 4.0;
+L0_fgr  = 4.0;
+A0_ctrl = 5.91;
+A0_fgr  = 5.64;
 
-%% --- 1. LEER PARAMETROS DEMIRAY (filas 6-7, columnas D y E) ---
+%% --- 1. LEER PARAMETROS DEMIRAY ---
 archivo = 'Resumen_datos_Procesados.xlsx';
-
-params = readmatrix(archivo, 'Sheet', 'Parametros', 'Range', 'D6:E7');
-a_ctrl = params(1,1);   % a UA_Control [MPa]
-b_ctrl = params(2,1);   % b UA_Control [-]
-a_fgr  = params(1,2);   % a UA_FGR     [MPa]
-b_fgr  = params(2,2);   % b UA_FGR     [-]
+params  = readmatrix(archivo, 'Sheet', 'Parametros', 'Range', 'D6:E7');
+a_ctrl  = params(1,1);
+b_ctrl  = params(2,1);
+a_fgr   = params(1,2);
+b_fgr   = params(2,2);
 
 fprintf('=== Parametros Demiray ===\n')
 fprintf('UA_Control: a = %.4f MPa,  b = %.4f\n', a_ctrl, b_ctrl)
@@ -64,33 +62,28 @@ fprintf('UA_FGR:     a = %.4f MPa,  b = %.4f\n', a_fgr,  b_fgr)
 %% --- 2. LEER DATOS EXPERIMENTALES ---
 disp_ctrl   = readmatrix(archivo, 'Sheet', 'AU_N',   'Range', 'AE3:AE2792');
 fuerza_ctrl = readmatrix(archivo, 'Sheet', 'AU_N',   'Range', 'AH3:AH2792');
-
 disp_fgr    = readmatrix(archivo, 'Sheet', 'AU_FGR', 'Range', 'AE3:AE2227');
 fuerza_fgr  = readmatrix(archivo, 'Sheet', 'AU_FGR', 'Range', 'AH3:AH2227');
 
-%% --- 3. STRETCH Y ESFUERZO DE CAUCHY EXPERIMENTAL ---
-% Stretch: λ = (L0 + desplazamiento) / L0
-lambda_ctrl = (L0_ctrl + disp_ctrl)  ./ L0_ctrl;
+%% --- 3. STRETCH Y CAUCHY EXPERIMENTAL ---
+lambda_ctrl = (L0_ctrl + disp_ctrl) ./ L0_ctrl;
 lambda_fgr  = (L0_fgr  + disp_fgr)  ./ L0_fgr;
 
-% Cauchy [kPa]: σ = (F/A0) * λ * 1000
-sigma_ctrl  = (fuerza_ctrl ./ A0_ctrl) .* lambda_ctrl * 1000;
-sigma_fgr   = (fuerza_fgr  ./ A0_fgr)  .* lambda_fgr  * 1000;
+sigma_ctrl  = (fuerza_ctrl ./ A0_ctrl) .* lambda_ctrl * 1000;  % [kPa]
+sigma_fgr   = (fuerza_fgr  ./ A0_fgr)  .* lambda_fgr  * 1000;  % [kPa]
 
-fprintf('\nTamaños: ctrl=%d puntos, fgr=%d puntos\n', ...
-        length(lambda_ctrl), length(lambda_fgr))
-fprintf('λ_max ctrl=%.3f,  λ_max fgr=%.3f\n', ...
-        max(lambda_ctrl), max(lambda_fgr))
+fprintf('\nλ_max ctrl=%.3f,  λ_max fgr=%.3f\n', max(lambda_ctrl), max(lambda_fgr))
 
-%% --- 4. MODELO DEMIRAY (Esfuerzo de Cauchy) ---
-% σ = a*(λ² - 1/λ) * exp(b*(λ² + 2/λ - 3))  [MPa] * 1000 → [kPa]
+%% --- 4. MODELO DEMIRAY CORREGIDO ---
+% Formula correcta (Utrera, ec. 2.8): b/2 en el exponente
+% σ = a*(λ²-1/λ) * exp(b/2*(λ²+2/λ-3))
 lambda_vec = linspace(1.0, 2.0, 1000);
 
 sigma_dem_ctrl = a_ctrl .* (lambda_vec.^2 - 1./lambda_vec) .* ...
-                 exp(b_ctrl .* (lambda_vec.^2 + 2./lambda_vec - 3)) * 1000;
+                 exp((b_ctrl/2) .* (lambda_vec.^2 + 2./lambda_vec - 3)) * 1000;  % [kPa]
 
 sigma_dem_fgr  = a_fgr  .* (lambda_vec.^2 - 1./lambda_vec) .* ...
-                 exp(b_fgr  .* (lambda_vec.^2 + 2./lambda_vec - 3)) * 1000;
+                 exp((b_fgr/2)  .* (lambda_vec.^2 + 2./lambda_vec - 3)) * 1000;  % [kPa]
 
 %% --- 5. MAXIMO ESFUERZO DE DISTENSION ---
 [s_max_ctrl, idx_c] = max(sigma_dem_ctrl);
@@ -113,15 +106,13 @@ plot(lambda_vec, sigma_dem_ctrl, '-',  'Color', 'r', ...
 plot(lambda_vec, sigma_dem_fgr,  '--', 'Color', 'b', ...
      'LineWidth', 2, 'DisplayName', 'UA\_FGR (Demiray)')
 
-% Lineas de zona
-xline(1.4, 'k--', 'LineWidth', 1)
-xline(1.7, 'k--', 'LineWidth', 1)
-text(1.1,  max(sigma_fgr)*0.95, 'Zone(1)', 'FontSize', 10)
-text(1.48, max(sigma_fgr)*0.95, 'Zone(2)', 'FontSize', 10)
-text(1.75, max(sigma_fgr)*0.95, 'Zone(3)', 'FontSize', 10)
+xline(1.4, 'k--', 'LineWidth', 1); xline(1.7, 'k--', 'LineWidth', 1)
+text(1.05, max(sigma_fgr)*0.92, 'Zone(1)', 'FontSize', 10)
+text(1.45, max(sigma_fgr)*0.92, 'Zone(2)', 'FontSize', 10)
+text(1.72, max(sigma_fgr)*0.92, 'Zone(3)', 'FontSize', 10)
 
 xlim([1.0 2.0])
-xlabel('Stretch (\lambda, u.a.)', 'FontSize', 13)
+xlabel('Stretch (\lambda, u.a.)',      'FontSize', 13)
 ylabel('Cauchy Stress (\sigma, kPa)', 'FontSize', 13)
 title('Curva Stress-Strain - UA Utrera', 'FontSize', 13)
 legend('Location', 'northwest', 'FontSize', 10)
@@ -130,38 +121,28 @@ grid on; hold off;
 saveas(gcf, 'stress_strain_Utrera.png')
 saveas(gcf, 'stress_strain_Utrera.fig')
 
-%% --- 7. MODULOS ELASTICOS APARENTES (3 ZONAS, 4 CURVAS) ---
-
-% Funcion: pendiente entre dos lambdas (busca indices mas cercanos)
+%% --- 7. MODULOS ELASTICOS (3 ZONAS, 4 CURVAS) ---
 get_E = @(lv, sv, l1, l2) ...
-    (sv(find(abs(lv - l2) == min(abs(lv - l2)), 1)) - ...
-     sv(find(abs(lv - l1) == min(abs(lv - l1)), 1))) / (l2 - l1);
+    (sv(find(abs(lv-l2)==min(abs(lv-l2)),1)) - ...
+     sv(find(abs(lv-l1)==min(abs(lv-l1)),1))) / (l2-l1);
 
-% Limites de zona
-z1a = 1.0;  z1b = 1.4;
-z2a = 1.4;  z2b = 1.7;
-z3a = 1.7;
-
+z1a=1.0; z1b=1.4; z2a=1.4; z2b=1.7; z3a=1.7;
 lam_max_ctrl = max(lambda_ctrl);
 lam_max_fgr  = max(lambda_fgr);
-lam_max_dem  = lambda_vec(end);   % = 2.0
+lam_max_dem  = lambda_vec(end);
 
-% Curva 1: UA_Control experimental
 E1_ctrl_exp = get_E(lambda_ctrl, sigma_ctrl, z1a, z1b);
 E2_ctrl_exp = get_E(lambda_ctrl, sigma_ctrl, z2a, z2b);
 E3_ctrl_exp = get_E(lambda_ctrl, sigma_ctrl, z3a, lam_max_ctrl);
 
-% Curva 2: UA_FGR experimental
 E1_fgr_exp  = get_E(lambda_fgr,  sigma_fgr,  z1a, z1b);
 E2_fgr_exp  = get_E(lambda_fgr,  sigma_fgr,  z2a, z2b);
 E3_fgr_exp  = get_E(lambda_fgr,  sigma_fgr,  z3a, lam_max_fgr);
 
-% Curva 3: UA_Control Demiray
 E1_ctrl_dem = get_E(lambda_vec, sigma_dem_ctrl, z1a, z1b);
 E2_ctrl_dem = get_E(lambda_vec, sigma_dem_ctrl, z2a, z2b);
 E3_ctrl_dem = get_E(lambda_vec, sigma_dem_ctrl, z3a, lam_max_dem);
 
-% Curva 4: UA_FGR Demiray
 E1_fgr_dem  = get_E(lambda_vec, sigma_dem_fgr,  z1a, z1b);
 E2_fgr_dem  = get_E(lambda_vec, sigma_dem_fgr,  z2a, z2b);
 E3_fgr_dem  = get_E(lambda_vec, sigma_dem_fgr,  z3a, lam_max_dem);
@@ -170,16 +151,15 @@ E3_fgr_dem  = get_E(lambda_vec, sigma_dem_fgr,  z3a, lam_max_dem);
 fprintf('\n================================================================\n')
 fprintf('           MODULOS ELASTICOS APARENTES [kPa]                   \n')
 fprintf('================================================================\n')
-fprintf('%-26s %11s %12s %12s\n', 'Curva', ...
-        'E1(1.0-1.4)', 'E2(1.4-1.7)', ...
-        sprintf('E3(1.7-%.2f)', lam_max_ctrl))
+fprintf('%-26s %11s %12s %12s\n','Curva','E1(1.0-1.4)','E2(1.4-1.7)', ...
+        sprintf('E3(1.7-%.2f)',lam_max_ctrl))
 fprintf('----------------------------------------------------------------\n')
-fprintf('%-26s %11.1f %12.1f %12.1f\n', 'UA_Control (exp)',     E1_ctrl_exp, E2_ctrl_exp, E3_ctrl_exp)
-fprintf('%-26s %11.1f %12.1f %12.1f\n', 'UA_FGR     (exp)',     E1_fgr_exp,  E2_fgr_exp,  E3_fgr_exp)
-fprintf('%-26s %11.1f %12.1f %12.1f\n', 'UA_Control (Demiray)', E1_ctrl_dem, E2_ctrl_dem, E3_ctrl_dem)
-fprintf('%-26s %11.1f %12.1f %12.1f\n', 'UA_FGR     (Demiray)', E1_fgr_dem,  E2_fgr_dem,  E3_fgr_dem)
+fprintf('%-26s %11.1f %12.1f %12.1f\n','UA_Control (exp)',    E1_ctrl_exp,E2_ctrl_exp,E3_ctrl_exp)
+fprintf('%-26s %11.1f %12.1f %12.1f\n','UA_FGR     (exp)',    E1_fgr_exp, E2_fgr_exp, E3_fgr_exp)
+fprintf('%-26s %11.1f %12.1f %12.1f\n','UA_Control (Demiray)',E1_ctrl_dem,E2_ctrl_dem,E3_ctrl_dem)
+fprintf('%-26s %11.1f %12.1f %12.1f\n','UA_FGR     (Demiray)',E1_fgr_dem, E2_fgr_dem, E3_fgr_dem)
 fprintf('================================================================\n')
-fprintf('Referencia Utrera:                                              \n')
-fprintf('UA_Control: E1=53.0   E2=125.4   E3=266.2 kPa                 \n')
-fprintf('UA_FGR:     E1=56.2   E2=275.1   E3=576.6 kPa                 \n')
+fprintf('Referencia Utrera:\n')
+fprintf('UA_Control: E1=53.0   E2=125.4   E3=266.2 kPa\n')
+fprintf('UA_FGR:     E1=56.2   E2=275.1   E3=576.6 kPa\n')
 fprintf('================================================================\n')
