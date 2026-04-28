@@ -170,45 +170,12 @@ E.fgr_dem  = [get_E(lambda_vec, sigma_dem_fgr,  z(1), z(2)), ...
               get_E(lambda_vec, sigma_dem_fgr,  z(2), z(3)), ...
               get_E(lambda_vec, sigma_dem_fgr,  z(3), z(4))];
 
-% Calcular modulos con incertidumbre (para etiquetas)
-[lv_z,sv_z]=subzona(lambda_ctrl,sigma_ctrl,z(1),z(2)); [E1c, S1c] =calc_E(lv_z,sv_z);
-[lv_z,sv_z]=subzona(lambda_ctrl,sigma_ctrl,z(2),z(3)); [E2c, S2c] =calc_E(lv_z,sv_z);
-[lv_z,sv_z]=subzona(lambda_ctrl,sigma_ctrl,z(3),z3_fin_ctrl); [E3c,S3c]=calc_E(lv_z,sv_z);
-
-[lv_z,sv_z]=subzona(lambda_fgr, sigma_fgr, z(1),z(2)); [E1f, S1f] =calc_E(lv_z,sv_z);
-[lv_z,sv_z]=subzona(lambda_fgr, sigma_fgr, z(2),z(3)); [E2f, S2f] =calc_E(lv_z,sv_z);
-[lv_z,sv_z]=subzona(lambda_fgr, sigma_fgr, z(3),z3_fin_fgr);  [E3f,S3f]=calc_E(lv_z,sv_z);
-
-[lv_z,sv_z]=subzona(lambda_vec,sigma_dem_ctrl,z(1),z(2)); [E1cd,S1cd]=calc_E(lv_z,sv_z);
-[lv_z,sv_z]=subzona(lambda_vec,sigma_dem_ctrl,z(2),z(3)); [E2cd,S2cd]=calc_E(lv_z,sv_z);
-[lv_z,sv_z]=subzona(lambda_vec,sigma_dem_ctrl,z(3),z(4)); [E3cd,S3cd]=calc_E(lv_z,sv_z);
-
-[lv_z,sv_z]=subzona(lambda_vec,sigma_dem_fgr, z(1),z(2)); [E1fd,S1fd]=calc_E(lv_z,sv_z);
-[lv_z,sv_z]=subzona(lambda_vec,sigma_dem_fgr, z(2),z(3)); [E2fd,S2fd]=calc_E(lv_z,sv_z);
-[lv_z,sv_z]=subzona(lambda_vec,sigma_dem_fgr, z(3),z(4)); [E3fd,S3fd]=calc_E(lv_z,sv_z);
-
-% Tabla resumen
-% fprintf('\n=================================================================\n')
-% fprintf('     MODULO ELASTICO APARENTE +- error estandar [kPa]           \n')
-% fprintf('=================================================================\n')
-% fprintf('%-24s  %-20s  %-20s  %-20s\n','Curva','Z1 [1.0-1.5]','Z2 [1.5-1.8]','Z3 [1.8-2.0]')
-% fprintf('-----------------------------------------------------------------\n')
-% fprintf('%-24s  %6.1f +- %5.1f  %6.1f +- %5.1f  %6.1f +- %5.1f\n','UA_Control (exp)',    E1c,S1c,   E2c,S2c,   E3c,S3c)
-% fprintf('%-24s  %6.1f +- %5.1f  %6.1f +- %5.1f  %6.1f +- %5.1f\n','UA_FGR     (exp)',    E1f,S1f,   E2f,S2f,   E3f,S3f)
-% fprintf('%-24s  %6.1f +- %5.1f  %6.1f +- %5.1f  %6.1f +- %5.1f\n','UA_Control (Demiray)',E1cd,S1cd, E2cd,S2cd, E3cd,S3cd)
-% fprintf('%-24s  %6.1f +- %5.1f  %6.1f +- %5.1f  %6.1f +- %5.1f\n','UA_FGR     (Demiray)',E1fd,S1fd, E2fd,S2fd, E3fd,S3fd)
-% fprintf('=================================================================\n')
-% fprintf('Target hidrogel (exp, Zona 2):\n')
-% fprintf('  UA_Control -> E_Z2 = %.1f +- %.1f kPa\n', E2c, S2c)
-% fprintf('  UA_FGR     -> E_Z2 = %.1f +- %.1f kPa\n', E2f, S2f)
-% fprintf('=================================================================\n')
-
 %% Grafico
 N = 20;
 lambda_ctrl_idx = 1:N:length(lambda_ctrl);
 lambda_fgr_idx  = 1:N:length(lambda_fgr);
 
-figure('Position', [100 100 950 600]);
+figure('Position', [100 100 1800 800]);
 hold on; box on;
 
 % Datos experimentales
@@ -271,7 +238,96 @@ grid on; hold off;
 %saveas(gcf, 'stress_strain_Utrera.png')
 %saveas(gcf, 'stress_strain_Utrera.fig')
 
-%7. Calcular el ajuste entre el Modelo Demiray los datos reales
+%Curvas Demiray
+%% 8. Modulo elastico aparente
+% Limites de zonas
+z = [1.0, 1.5, 1.8, 2.0];
+
+% Funcion: modulo secante por teorema del valor medio
+get_E = @(lv, sv, l1, l2) ...
+    (sv(find(abs(lv - l2) == min(abs(lv - l2)), 1)) - ...
+     sv(find(abs(lv - l1) == min(abs(lv - l1)), 1))) / (l2 - l1);
+
+% Funcion: recta secante entre dos limites de zona
+line_secante = @(lv, sv, l1, l2) deal( ...
+    [l1, l2], ...
+    [sv(find(abs(lv-l1)==min(abs(lv-l1)),1)), ...
+     sv(find(abs(lv-l2)==min(abs(lv-l2)),1))] );
+
+% Funcion: subzona recorta vectores al rango [l1,l2]
+subzona = @(lv, sv, l1, l2) deal(lv(lv>=l1 & lv<=l2), sv(lv>=l1 & lv<=l2));
+
+% Funcion: modulo secante + std del modulo tangente local
+calc_E = @(lv_z, sv_z) deal( ...
+    (sv_z(end) - sv_z(1)) / (lv_z(end) - lv_z(1)), ...
+    std(diff(sv_z) ./ diff(lv_z)) );
+
+% Limite real de Z3
+lam_max_ctrl = max(lambda_ctrl);
+lam_max_fgr  = max(lambda_fgr);
+z3_fin_ctrl  = min(lam_max_ctrl, z(4));
+z3_fin_fgr   = min(lam_max_fgr,  z(4));
+
+% Calcular modulos Demiray
+E.ctrl_dem = [get_E(lambda_vec, sigma_dem_ctrl, z(1), z(2)), ...
+              get_E(lambda_vec, sigma_dem_ctrl, z(2), z(3)), ...
+              get_E(lambda_vec, sigma_dem_ctrl, z(3), z(4))];
+E.fgr_dem  = [get_E(lambda_vec, sigma_dem_fgr,  z(1), z(2)), ...
+              get_E(lambda_vec, sigma_dem_fgr,  z(2), z(3)), ...
+              get_E(lambda_vec, sigma_dem_fgr,  z(3), z(4))];
+
+% Calcular modulos Demiray con incertidumbre
+[lv_z,sv_z]=subzona(lambda_vec,sigma_dem_ctrl,z(1),z(2)); [E1cd,S1cd]=calc_E(lv_z,sv_z);
+[lv_z,sv_z]=subzona(lambda_vec,sigma_dem_ctrl,z(2),z(3)); [E2cd,S2cd]=calc_E(lv_z,sv_z);
+[lv_z,sv_z]=subzona(lambda_vec,sigma_dem_ctrl,z(3),z(4)); [E3cd,S3cd]=calc_E(lv_z,sv_z);
+
+[lv_z,sv_z]=subzona(lambda_vec,sigma_dem_fgr, z(1),z(2)); [E1fd,S1fd]=calc_E(lv_z,sv_z);
+[lv_z,sv_z]=subzona(lambda_vec,sigma_dem_fgr, z(2),z(3)); [E2fd,S2fd]=calc_E(lv_z,sv_z);
+[lv_z,sv_z]=subzona(lambda_vec,sigma_dem_fgr, z(3),z(4)); [E3fd,S3fd]=calc_E(lv_z,sv_z);
+
+%% Grafico — solo Demiray
+figure('Position', [100 100 1800 800]);
+hold on; box on;
+
+% Curvas Demiray unicamente
+plot(lambda_vec, sigma_dem_ctrl, 'o-',  'Color','r','LineWidth',1,'DisplayName','UA\_Control (Demiray)')
+plot(lambda_vec, sigma_dem_fgr,  's-', 'Color','b','LineWidth',1,'DisplayName','UA\_FGR (Demiray)')
+
+% Rectas secantes Demiray (punteado negro)
+zonas_dem = {[z(1) z(2)], [z(2) z(3)], [z(3) z(4)]};
+for k = 1:3
+    [lx,ly]=line_secante(lambda_vec, sigma_dem_ctrl, zonas_dem{k}(1), zonas_dem{k}(2));
+    plot(lx,ly,'k:', 'LineWidth',1.0,'HandleVisibility','off')
+    [lx,ly]=line_secante(lambda_vec, sigma_dem_fgr,  zonas_dem{k}(1), zonas_dem{k}(2));
+    plot(lx,ly,'k:', 'LineWidth',1.0,'HandleVisibility','off')
+end
+
+% Lineas de zona
+xline(1.5,'k--','LineWidth',1,'HandleVisibility','off');
+xline(1.8,'k--','LineWidth',1,'HandleVisibility','off');
+
+% Etiquetas zona
+% Zone 1
+text(1.22, -30,  'Zone(1)', 'FontSize',12)
+text(1.22, -52,  sprintf('$E_{Dem}^{ctrl}$=%.0f$\\pm$%.0f kPa', E1cd,S1cd), 'FontSize',12,'Color','r')
+text(1.22, -75,  sprintf('$E_{Dem}^{FGR}$=%.0f$\\pm$%.0f kPa',  E1fd,S1fd), 'FontSize',12,'Color','b')
+% Zone 2
+text(1.62, -30,  'Zone(2)', 'FontSize',12)
+text(1.62, -52,  sprintf('$E_{Dem}^{ctrl}$=%.0f$\\pm$%.0f kPa', E2cd,S2cd), 'FontSize',12,'Color','r')
+text(1.62, -75,  sprintf('$E_{Dem}^{FGR}$=%.0f$\\pm$%.0f kPa',  E2fd,S2fd), 'FontSize',12,'Color','b')
+% Zone 3
+text(1.82, -30,  'Zone(3)', 'FontSize',12)
+text(1.82, -52,  sprintf('$E_{Dem}^{ctrl}$=%.0f$\\pm$%.0f kPa', E3cd,S3cd), 'FontSize',12,'Color','r')
+text(1.82, -75,  sprintf('$E_{Dem}^{FGR}$=%.0f$\\pm$%.0f kPa',  E3fd,S3fd), 'FontSize',12,'Color','b')
+
+xlim([1.0 2.0]); ylim([-100 300])
+xlabel('Stretch $(\lambda$, u.a.)',      'FontSize',13)
+ylabel('Cauchy Stress $(\sigma$, kPa)', 'FontSize',13)
+legend('Location','northwest',           'FontSize',11)
+grid on; hold off;
+exportgraphics(gcf, 'stress_strain_demiray_only.tif', 'Resolution', 300)
+
+%N. Calcular el ajuste entre el Modelo Demiray los datos reales
 %Interpolación de Demiray en los puntos experimentales
 sigma_dem_ctrl_i = interp1(lambda_vec, sigma_dem_ctrl, lambda_ctrl,'linear',NaN);
 sigma_dem_fgr_i = interp1(lambda_vec, sigma_dem_fgr, lambda_fgr,'linear',NaN);
@@ -346,46 +402,3 @@ axis equal; grid on; hold off;
 
 
 
-
-%N. Módulos elásticos aparentes
-get_E = @(lv, sv, l1, l2) ...
-    (sv(find(abs(lv-l2)==min(abs(lv-l2)),1)) - ...
-     sv(find(abs(lv-l1)==min(abs(lv-l1)),1))) / (l2-l1);
-
-z1a=1.0; z1b=1.4; z2a=1.4; z2b=1.7; z3a=1.7;
-lam_max_ctrl = max(lambda_ctrl);
-lam_max_fgr  = max(lambda_fgr);
-lam_max_dem  = lambda_vec(end);
-
-E1_ctrl_exp = get_E(lambda_ctrl, sigma_ctrl, z1a, z1b);
-E2_ctrl_exp = get_E(lambda_ctrl, sigma_ctrl, z2a, z2b);
-E3_ctrl_exp = get_E(lambda_ctrl, sigma_ctrl, z3a, lam_max_ctrl);
-
-E1_fgr_exp  = get_E(lambda_fgr,  sigma_fgr,  z1a, z1b);
-E2_fgr_exp  = get_E(lambda_fgr,  sigma_fgr,  z2a, z2b);
-E3_fgr_exp  = get_E(lambda_fgr,  sigma_fgr,  z3a, lam_max_fgr);
-
-E1_ctrl_dem = get_E(lambda_vec, sigma_dem_ctrl, z1a, z1b);
-E2_ctrl_dem = get_E(lambda_vec, sigma_dem_ctrl, z2a, z2b);
-E3_ctrl_dem = get_E(lambda_vec, sigma_dem_ctrl, z3a, lam_max_dem);
-
-E1_fgr_dem  = get_E(lambda_vec, sigma_dem_fgr,  z1a, z1b);
-E2_fgr_dem  = get_E(lambda_vec, sigma_dem_fgr,  z2a, z2b);
-E3_fgr_dem  = get_E(lambda_vec, sigma_dem_fgr,  z3a, lam_max_dem);
-
-%% --- 8. TABLA RESUMEN ---
-fprintf('\n================================================================\n')
-fprintf('           MODULOS ELASTICOS APARENTES [kPa]                   \n')
-fprintf('================================================================\n')
-fprintf('%-26s %11s %12s %12s\n','Curva','E1(1.0-1.4)','E2(1.4-1.7)', ...
-        sprintf('E3(1.7-%.2f)',lam_max_ctrl))
-fprintf('----------------------------------------------------------------\n')
-fprintf('%-26s %11.1f %12.1f %12.1f\n','UA_Control (exp)',    E1_ctrl_exp,E2_ctrl_exp,E3_ctrl_exp)
-fprintf('%-26s %11.1f %12.1f %12.1f\n','UA_FGR     (exp)',    E1_fgr_exp, E2_fgr_exp, E3_fgr_exp)
-fprintf('%-26s %11.1f %12.1f %12.1f\n','UA_Control (Demiray)',E1_ctrl_dem,E2_ctrl_dem,E3_ctrl_dem)
-fprintf('%-26s %11.1f %12.1f %12.1f\n','UA_FGR     (Demiray)',E1_fgr_dem, E2_fgr_dem, E3_fgr_dem)
-fprintf('================================================================\n')
-fprintf('Referencia Utrera:\n')
-fprintf('UA_Control: E1=53.0   E2=125.4   E3=266.2 kPa\n')
-fprintf('UA_FGR:     E1=56.2   E2=275.1   E3=576.6 kPa\n')
-fprintf('================================================================\n')
