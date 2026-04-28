@@ -123,7 +123,7 @@ ylabel('Cauchy Stress $(\sigma$, kPa)','FontSize', 13)
 legend('Location', 'best', 'FontSize', 10)
 grid on; hold off;
 
-%% 8. Modulo elastico aparente
+%% 8. Modulo elastico aparente datos experimentales
 % Limites de zonas
 z = [1.0, 1.5, 1.8, 2.0];
 
@@ -178,65 +178,143 @@ lambda_fgr_idx  = 1:N:length(lambda_fgr);
 figure('Position', [100 100 1800 800]);
 hold on; box on;
 
-% Datos experimentales
-plot(lambda_ctrl(lambda_ctrl_idx), sigma_ctrl(lambda_ctrl_idx), 'o', ...
+% Datos experimentales decimados
+plot(lambda_ctrl(lambda_ctrl_idx), sigma_ctrl(lambda_ctrl_idx), 'o-', ...
      'Color','r','MarkerSize',4,'MarkerFaceColor','none','DisplayName','UA\_Control (exp)')
-plot(lambda_fgr(lambda_fgr_idx),   sigma_fgr(lambda_fgr_idx),   's', ...
+plot(lambda_fgr(lambda_fgr_idx),   sigma_fgr(lambda_fgr_idx),   's-', ...
      'Color','b','MarkerSize',4,'MarkerFaceColor','none','DisplayName','UA\_FGR (exp)')
 
-% Curvas Demiray
-plot(lambda_vec, sigma_dem_ctrl, '-',  'Color','r','LineWidth',2,'DisplayName','UA\_Control (Demiray)')
-plot(lambda_vec, sigma_dem_fgr,  '--', 'Color','b','LineWidth',2,'DisplayName','UA\_FGR (Demiray)')
-
-% Rectas secantes: solido = experimental, punteado = Demiray
+% Rectas secantes experimentales
 zonas_ctrl = {[z(1) z(2)], [z(2) z(3)], [z(3) z3_fin_ctrl]};
 zonas_fgr  = {[z(1) z(2)], [z(2) z(3)], [z(3) z3_fin_fgr]};
-zonas_dem  = {[z(1) z(2)], [z(2) z(3)], [z(3) z(4)]};
 
 for k = 1:3
-    [lx,ly]=line_secante(lambda_ctrl,sigma_ctrl,    zonas_ctrl{k}(1),zonas_ctrl{k}(2));
+    [lx,ly]=line_secante(lambda_ctrl, sigma_ctrl, zonas_ctrl{k}(1), zonas_ctrl{k}(2));
     plot(lx,ly,'k-', 'LineWidth',0.5,'HandleVisibility','off')
-    [lx,ly]=line_secante(lambda_fgr, sigma_fgr,     zonas_fgr{k}(1), zonas_fgr{k}(2));
+    [lx,ly]=line_secante(lambda_fgr,  sigma_fgr,  zonas_fgr{k}(1),  zonas_fgr{k}(2));
     plot(lx,ly,'k-', 'LineWidth',0.5,'HandleVisibility','off')
-    [lx,ly]=line_secante(lambda_vec, sigma_dem_ctrl, zonas_dem{k}(1), zonas_dem{k}(2));
-    plot(lx,ly,'k:', 'LineWidth',0.5,'HandleVisibility','off')
-    [lx,ly]=line_secante(lambda_vec, sigma_dem_fgr,  zonas_dem{k}(1), zonas_dem{k}(2));
-    plot(lx,ly,'k:', 'LineWidth',0.5,'HandleVisibility','off')
 end
 
 % Lineas de zona
 xline(1.5,'k--','LineWidth',1,'HandleVisibility','off');
 xline(1.8,'k--','LineWidth',1,'HandleVisibility','off');
 
-% Etiquetas zona + modulos con +-
+% Etiquetas zona + modulos experimentales con +-
 % Zone 1
-text(1.22, -30,  'Zone(1)',  'FontSize',10)
-text(1.22, -52,  sprintf('$E_{exp}^{ctrl}$=%.0f$\\pm$%.0f kPa', E1c, S1c),   'FontSize',8,'Color','r')
-text(1.22, -72,  sprintf('$E_{exp}^{FGR}$=%.0f$\\pm$%.0f kPa',  E1f, S1f),   'FontSize',8,'Color','b')
-text(1.22, -92,  sprintf('$E_{Dem}^{ctrl}$=%.0f$\\pm$%.0f kPa', E1cd,S1cd),  'FontSize',8,'Color',[0.6 0 0])
-text(1.22, -112, sprintf('$E_{Dem}^{FGR}$=%.0f$\\pm$%.0f kPa',  E1fd,S1fd),  'FontSize',8,'Color',[0 0 0.6])
+text(1.22, -30,  'Zone(1)', 'FontSize',12)
+text(1.22, -52,  sprintf('$E_{exp}^{ctrl}$=%.0f$\\pm$%.0f kPa', E1c,S1c), 'FontSize',12,'Color','r')
+text(1.22, -75,  sprintf('$E_{exp}^{FGR}$=%.0f$\\pm$%.0f kPa',  E1f,S1f), 'FontSize',12,'Color','b')
 % Zone 2
-text(1.62, -30,  'Zone(2)',  'FontSize',10)
-text(1.62, -52,  sprintf('$E_{exp}^{ctrl}$=%.0f$\\pm$%.0f kPa', E2c, S2c),   'FontSize',8,'Color','r')
-text(1.62, -72,  sprintf('$E_{exp}^{FGR}$=%.0f$\\pm$%.0f kPa',  E2f, S2f),   'FontSize',8,'Color','b')
-text(1.62, -92,  sprintf('$E_{Dem}^{ctrl}$=%.0f$\\pm$%.0f kPa', E2cd,S2cd),  'FontSize',8,'Color',[0.6 0 0])
-text(1.62, -112, sprintf('$E_{Dem}^{FGR}$=%.0f$\\pm$%.0f kPa',  E2fd,S2fd),  'FontSize',8,'Color',[0 0 0.6])
+text(1.62, -30,  'Zone(2)', 'FontSize',12)
+text(1.62, -52,  sprintf('$E_{exp}^{ctrl}$=%.0f$\\pm$%.0f kPa', E2c,S2c), 'FontSize',12,'Color','r')
+text(1.62, -75,  sprintf('$E_{exp}^{FGR}$=%.0f$\\pm$%.0f kPa',  E2f,S2f), 'FontSize',12,'Color','b')
 % Zone 3
-text(1.87, -30,  'Zone(3)',  'FontSize',10)
-text(1.87, -52,  sprintf('$E_{exp}^{ctrl}$=%.0f$\\pm$%.0f kPa', E3c, S3c),   'FontSize',8,'Color','r')
-text(1.87, -72,  sprintf('$E_{exp}^{FGR}$=%.0f$\\pm$%.0f kPa',  E3f, S3f),   'FontSize',8,'Color','b')
-text(1.87, -92,  sprintf('$E_{Dem}^{ctrl}$=%.0f$\\pm$%.0f kPa', E3cd,S3cd),  'FontSize',8,'Color',[0.6 0 0])
-text(1.87, -112, sprintf('$E_{Dem}^{FGR}$=%.0f$\\pm$%.0f kPa',  E3fd,S3fd),  'FontSize',8,'Color',[0 0 0.6])
+text(1.82, -30,  'Zone(3)', 'FontSize',12)
+text(1.82, -52,  sprintf('$E_{exp}^{ctrl}$=%.0f$\\pm$%.0f kPa', E3c,S3c), 'FontSize',12,'Color','r')
+text(1.82, -75,  sprintf('$E_{exp}^{FGR}$=%.0f$\\pm$%.0f kPa',  E3f,S3f), 'FontSize',12,'Color','b')
 
-xlim([1.0 2.0]); ylim([-150 350])
+xlim([1.0 2.0]); ylim([-100 350])
 xlabel('Stretch $(\lambda$, u.a.)',      'FontSize',13)
 ylabel('Cauchy Stress $(\sigma$, kPa)', 'FontSize',13)
-legend('Location','northwest',           'FontSize',10)
+legend('Location','northwest',           'FontSize',11)
 grid on; hold off;
-              
+
+exportgraphics(gcf, 'stress_strain_exp_only.tif', 'Resolution', 300)
 
 %saveas(gcf, 'stress_strain_Utrera.png')
 %saveas(gcf, 'stress_strain_Utrera.fig')
+
+%Curvas Demiray
+%% 8. Modulo elastico aparente
+% Limites de zonas
+z = [1.0, 1.5, 1.8, 2.0];
+
+% Funcion: modulo secante por teorema del valor medio
+get_E = @(lv, sv, l1, l2) ...
+    (sv(find(abs(lv - l2) == min(abs(lv - l2)), 1)) - ...
+     sv(find(abs(lv - l1) == min(abs(lv - l1)), 1))) / (l2 - l1);
+
+% Funcion: recta secante entre dos limites de zona
+line_secante = @(lv, sv, l1, l2) deal( ...
+    [l1, l2], ...
+    [sv(find(abs(lv-l1)==min(abs(lv-l1)),1)), ...
+     sv(find(abs(lv-l2)==min(abs(lv-l2)),1))] );
+
+% Funcion: subzona recorta vectores al rango [l1,l2]
+subzona = @(lv, sv, l1, l2) deal(lv(lv>=l1 & lv<=l2), sv(lv>=l1 & lv<=l2));
+
+% Funcion: modulo secante + std del modulo tangente local
+calc_E = @(lv_z, sv_z) deal( ...
+    (sv_z(end) - sv_z(1)) / (lv_z(end) - lv_z(1)), ...
+    std(diff(sv_z) ./ diff(lv_z)) );
+
+% Limite real de Z3
+lam_max_ctrl = max(lambda_ctrl);
+lam_max_fgr  = max(lambda_fgr);
+z3_fin_ctrl  = min(lam_max_ctrl, z(4));
+z3_fin_fgr   = min(lam_max_fgr,  z(4));
+
+% Modulos secantes experimentales
+E.ctrl_exp = [get_E(lambda_ctrl, sigma_ctrl, z(1), z(2)), ...
+              get_E(lambda_ctrl, sigma_ctrl, z(2), z(3)), ...
+              get_E(lambda_ctrl, sigma_ctrl, z(3), z3_fin_ctrl)];
+E.fgr_exp  = [get_E(lambda_fgr,  sigma_fgr,  z(1), z(2)), ...
+              get_E(lambda_fgr,  sigma_fgr,  z(2), z(3)), ...
+              get_E(lambda_fgr,  sigma_fgr,  z(3), z3_fin_fgr)];
+
+% Modulos con incertidumbre experimentales
+[lv_z,sv_z]=subzona(lambda_ctrl,sigma_ctrl,z(1),z(2));        [E1c,S1c]=calc_E(lv_z,sv_z);
+[lv_z,sv_z]=subzona(lambda_ctrl,sigma_ctrl,z(2),z(3));        [E2c,S2c]=calc_E(lv_z,sv_z);
+[lv_z,sv_z]=subzona(lambda_ctrl,sigma_ctrl,z(3),z3_fin_ctrl); [E3c,S3c]=calc_E(lv_z,sv_z);
+
+[lv_z,sv_z]=subzona(lambda_fgr, sigma_fgr, z(1),z(2));        [E1f,S1f]=calc_E(lv_z,sv_z);
+[lv_z,sv_z]=subzona(lambda_fgr, sigma_fgr, z(2),z(3));        [E2f,S2f]=calc_E(lv_z,sv_z);
+[lv_z,sv_z]=subzona(lambda_fgr, sigma_fgr, z(3),z3_fin_fgr);  [E3f,S3f]=calc_E(lv_z,sv_z);
+
+%% Grafico — solo Experimental
+N = 20;
+lambda_ctrl_idx = 1:N:length(lambda_ctrl);
+lambda_fgr_idx = 1:N:length(lambda_fgr);
+figure('Position', [100 100 1800 800]);
+hold on; box on;
+
+% Curvas Demiray unicamente
+plot(lambda_, sigma_dem_ctrl, 'o-',  'Color','r','LineWidth',1,'DisplayName','UA\_Control (Demiray)')
+plot(lambda_vec, sigma_dem_fgr,  's-', 'Color','b','LineWidth',1,'DisplayName','UA\_FGR (Demiray)')
+
+% Rectas secantes Demiray (punteado negro)
+zonas_dem = {[z(1) z(2)], [z(2) z(3)], [z(3) z(4)]};
+for k = 1:3
+    [lx,ly]=line_secante(lambda_vec, sigma_dem_ctrl, zonas_dem{k}(1), zonas_dem{k}(2));
+    plot(lx,ly,'k:', 'LineWidth',1.0,'HandleVisibility','off')
+    [lx,ly]=line_secante(lambda_vec, sigma_dem_fgr,  zonas_dem{k}(1), zonas_dem{k}(2));
+    plot(lx,ly,'k:', 'LineWidth',1.0,'HandleVisibility','off')
+end
+
+% Lineas de zona
+xline(1.5,'k--','LineWidth',1,'HandleVisibility','off');
+xline(1.8,'k--','LineWidth',1,'HandleVisibility','off');
+
+% Etiquetas zona
+% Zone 1
+text(1.22, -30,  'Zone(1)', 'FontSize',12)
+text(1.22, -52,  sprintf('$E_{Exp}^{ctrl}$=%.0f$\\pm$%.0f kPa', E1cd,S1cd), 'FontSize',12,'Color','r')
+text(1.22, -75,  sprintf('$E_{Exp}^{FGR}$=%.0f$\\pm$%.0f kPa',  E1fd,S1fd), 'FontSize',12,'Color','b')
+% Zone 2
+text(1.62, -30,  'Zone(2)', 'FontSize',12)
+text(1.62, -52,  sprintf('$E_{Exp}^{ctrl}$=%.0f$\\pm$%.0f kPa', E2cd,S2cd), 'FontSize',12,'Color','r')
+text(1.62, -75,  sprintf('$E_{Exp}^{FGR}$=%.0f$\\pm$%.0f kPa',  E2fd,S2fd), 'FontSize',12,'Color','b')
+% Zone 3
+text(1.82, -30,  'Zone(3)', 'FontSize',12)
+text(1.82, -52,  sprintf('$E_{Exp}^{ctrl}$=%.0f$\\pm$%.0f kPa', E3cd,S3cd), 'FontSize',12,'Color','r')
+text(1.82, -75,  sprintf('$E_{Exp}^{FGR}$=%.0f$\\pm$%.0f kPa',  E3fd,S3fd), 'FontSize',12,'Color','b')
+
+xlim([1.0 2.0]); ylim([-100 300])
+xlabel('Stretch $(\lambda$, u.a.)',      'FontSize',13)
+ylabel('Cauchy Stress $(\sigma$, kPa)', 'FontSize',13)
+legend('Location','northwest',           'FontSize',11)
+grid on; hold off;
+exportgraphics(gcf, 'stress_strain_experimental_only.tif', 'Resolution', 300)
 
 %Curvas Demiray
 %% 8. Modulo elastico aparente
