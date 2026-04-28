@@ -327,6 +327,230 @@ legend('Location','northwest',           'FontSize',11)
 grid on; hold off;
 exportgraphics(gcf, 'stress_strain_demiray_only.tif', 'Resolution', 300)
 
+%% 9. Grafico de barras con error y significancia 
+% Modulo tangente local por zona — datos experimentales
+get_tangente = @(lv, sv, l1, l2) diff(sv(lv>=l1 & lv<=l2)) ./ ...
+                                   diff(lv(lv>=l1 & lv<=l2));
+
+dE1_ctrl = get_tangente(lambda_ctrl, sigma_ctrl, z(1), z(2));
+dE1_fgr  = get_tangente(lambda_fgr,  sigma_fgr,  z(1), z(2));
+dE2_ctrl = get_tangente(lambda_ctrl, sigma_ctrl, z(2), z(3));
+dE2_fgr  = get_tangente(lambda_fgr,  sigma_fgr,  z(2), z(3));
+dE3_ctrl = get_tangente(lambda_ctrl, sigma_ctrl, z(3), z3_fin_ctrl);
+dE3_fgr  = get_tangente(lambda_fgr,  sigma_fgr,  z(3), z3_fin_fgr);
+
+% Medias y SEM (error estandar de la media)
+means_ctrl = [mean(dE1_ctrl), mean(dE2_ctrl), mean(dE3_ctrl)];
+means_fgr  = [mean(dE1_fgr),  mean(dE2_fgr),  mean(dE3_fgr)];
+sem_ctrl   = [std(dE1_ctrl)/sqrt(length(dE1_ctrl)), ...
+              std(dE2_ctrl)/sqrt(length(dE2_ctrl)), ...
+              std(dE3_ctrl)/sqrt(length(dE3_ctrl))];
+sem_fgr    = [std(dE1_fgr)/sqrt(length(dE1_fgr)), ...
+              std(dE2_fgr)/sqrt(length(dE2_fgr)), ...
+              std(dE3_fgr)/sqrt(length(dE3_fgr))];
+
+% Test de normalidad KS
+[~,pn1c]=kstest((dE1_ctrl-mean(dE1_ctrl))/std(dE1_ctrl));
+[~,pn1f]=kstest((dE1_fgr -mean(dE1_fgr)) /std(dE1_fgr));
+[~,pn2c]=kstest((dE2_ctrl-mean(dE2_ctrl))/std(dE2_ctrl));
+[~,pn2f]=kstest((dE2_fgr -mean(dE2_fgr)) /std(dE2_fgr));
+[~,pn3c]=kstest((dE3_ctrl-mean(dE3_ctrl))/std(dE3_ctrl));
+[~,pn3f]=kstest((dE3_fgr -mean(dE3_fgr)) /std(dE3_fgr));
+
+% Tests estadisticos — inline sin funciones
+if pn1c>0.05 && pn1f>0.05
+    [~,p1]=ttest2(dE1_ctrl,dE1_fgr,'Vartype','unequal'); tname1='t-Welch';
+else
+    p1=ranksum(dE1_ctrl,dE1_fgr); tname1='Mann-Whitney';
+end
+if pn2c>0.05 && pn2f>0.05
+    [~,p2]=ttest2(dE2_ctrl,dE2_fgr,'Vartype','unequal'); tname2='t-Welch';
+else
+    p2=ranksum(dE2_ctrl,dE2_fgr); tname2='Mann-Whitney';
+end
+if pn3c>0.05 && pn3f>0.05
+    [~,p3]=ttest2(dE3_ctrl,dE3_fgr,'Vartype','unequal'); tname3='t-Welch';
+else
+    p3=ranksum(dE3_ctrl,dE3_fgr); tname3='Mann-Whitney';
+end
+
+% Etiquetas de significancia — inline
+pvals = [p1, p2, p3];
+sig   = cell(1,3);
+for k = 1:3
+    if     pvals(k) < 0.001, sig{k} = '***';
+    elseif pvals(k) < 0.01,  sig{k} = '**';
+    elseif pvals(k) < 0.05,  sig{k} = '*';
+    else,                    sig{k} = 'ns';
+    end
+end
+
+fprintf('\n=== Significancia estadistica ===\n')
+fprintf('Zona 1 (%s): p=%.4f  %s\n', tname1, p1, sig{1})
+fprintf('Zona 2 (%s): p=%.4f  %s\n', tname2, p2, sig{2})
+fprintf('Zona 3 (%s): p=%.4f  %s\n', tname3, p3, sig{3})
+
+%% Grafico de barras estilo referencia
+figure('Position', [100 100 700 550]);
+hold on; box on;
+
+n_zonas = 3;
+x       = 1:n_zonas;
+ancho   = 0.35;
+offset  = 0.20;
+
+% Barras Control
+b1 = bar(x - offset, means_ctrl, ancho, ...
+         'FaceColor','r','FaceAlpha',0.85,'EdgeColor','k','DisplayName','UA Control');
+% Barras FGR
+b2 = bar(x + offset, means_fgr,  ancho, ...
+         'FaceColor','b','FaceAlpha',0.85,'EdgeColor','k','DisplayName','UA FGR');
+
+% Barras de error (SEM)
+errorbar(x - offset, means_ctrl, sem_ctrl, ...
+         'k.','LineWidth',1.5,'CapSize',8,'HandleVisibility','off')
+errorbar(x + offset, means_fgr,  sem_fgr, ...
+         'k.','LineWidth',1.5,'CapSize',8,'HandleVisibility','off')
+
+% Anotaciones de significancia
+y_top = max([means_ctrl + sem_ctrl, means_fgr + sem_fgr]);
+for k = 1:3
+    y_sig = max([means_ctrl(k)+sem_ctrl(k), means_fgr(k)+sem_fgr(k)]) * 1.12;
+    % Linea horizontal de significancia
+    plot([x(k)-offset, x(k)+offset], [y_sig y_sig], 'k-', ...
+         'LineWidth', 1, 'HandleVisibility','off')
+    % Simbolo
+    fs = 14;
+    if strcmp(sig{k},'ns'), fs = 11; end
+    text(x(k), y_sig * 1.03, sig{k}, ...
+         'FontSize',fs,'HorizontalAlignment','center', ...
+         'FontWeight','bold','Color','k')
+end
+
+% Ejes y etiquetas
+xticks(x)
+xticklabels({'Zone(1)','Zone(2)','Zone(3)'})
+xlabel('Stretch Intervals', 'FontSize',13)
+ylabel('Stretch Modulus ($E$, kPa)', 'FontSize',13)
+ylim([0, max([means_ctrl+sem_ctrl, means_fgr+sem_fgr])*1.25])
+legend('Location','northwest','FontSize',11)
+grid on; hold off;
+title('Comparisson Experimental data');
+exportgraphics(gcf,'Histograma_Experimental_Data.tif','Resolution',300)
+
+
+% Modulo tangente local por zona — datos Demiray
+get_tangente = @(lv, sv, l1, l2) diff(sv(lv>=l1 & lv<=l2)) ./ ...
+                                   diff(lv(lv>=l1 & lv<=l2));
+
+dE1_ctrl = get_tangente(lambda_vec, sigma_dem_ctrl, z(1), z(2));
+dE1_fgr  = get_tangente(lambda_vec,  sigma_dem_fgr,  z(1), z(2));
+dE2_ctrl = get_tangente(lambda_vec, sigma_dem_ctrl, z(2), z(3));
+dE2_fgr  = get_tangente(lambda_vec,  sigma_dem_fgr,  z(2), z(3));
+dE3_ctrl = get_tangente(lambda_vec, sigma_dem_ctrl, z(3), z3_fin_ctrl);
+dE3_fgr  = get_tangente(lambda_vec,  sigma_dem_fgr,  z(3), z3_fin_fgr);
+
+% Medias y SEM (error estandar de la media)
+means_ctrl = [mean(dE1_ctrl), mean(dE2_ctrl), mean(dE3_ctrl)];
+means_fgr  = [mean(dE1_fgr),  mean(dE2_fgr),  mean(dE3_fgr)];
+sem_ctrl   = [std(dE1_ctrl)/sqrt(length(dE1_ctrl)), ...
+              std(dE2_ctrl)/sqrt(length(dE2_ctrl)), ...
+              std(dE3_ctrl)/sqrt(length(dE3_ctrl))];
+sem_fgr    = [std(dE1_fgr)/sqrt(length(dE1_fgr)), ...
+              std(dE2_fgr)/sqrt(length(dE2_fgr)), ...
+              std(dE3_fgr)/sqrt(length(dE3_fgr))];
+
+% Test de normalidad KS
+[~,pn1c]=kstest((dE1_ctrl-mean(dE1_ctrl))/std(dE1_ctrl));
+[~,pn1f]=kstest((dE1_fgr -mean(dE1_fgr)) /std(dE1_fgr));
+[~,pn2c]=kstest((dE2_ctrl-mean(dE2_ctrl))/std(dE2_ctrl));
+[~,pn2f]=kstest((dE2_fgr -mean(dE2_fgr)) /std(dE2_fgr));
+[~,pn3c]=kstest((dE3_ctrl-mean(dE3_ctrl))/std(dE3_ctrl));
+[~,pn3f]=kstest((dE3_fgr -mean(dE3_fgr)) /std(dE3_fgr));
+
+% Tests estadisticos — inline sin funciones
+if pn1c>0.05 && pn1f>0.05
+    [~,p1]=ttest2(dE1_ctrl,dE1_fgr,'Vartype','unequal'); tname1='t-Welch';
+else
+    p1=ranksum(dE1_ctrl,dE1_fgr); tname1='Mann-Whitney';
+end
+if pn2c>0.05 && pn2f>0.05
+    [~,p2]=ttest2(dE2_ctrl,dE2_fgr,'Vartype','unequal'); tname2='t-Welch';
+else
+    p2=ranksum(dE2_ctrl,dE2_fgr); tname2='Mann-Whitney';
+end
+if pn3c>0.05 && pn3f>0.05
+    [~,p3]=ttest2(dE3_ctrl,dE3_fgr,'Vartype','unequal'); tname3='t-Welch';
+else
+    p3=ranksum(dE3_ctrl,dE3_fgr); tname3='Mann-Whitney';
+end
+
+% Etiquetas de significancia — inline
+pvals = [p1, p2, p3];
+sig   = cell(1,3);
+for k = 1:3
+    if     pvals(k) < 0.001, sig{k} = '***';
+    elseif pvals(k) < 0.01,  sig{k} = '**';
+    elseif pvals(k) < 0.05,  sig{k} = '*';
+    else,                    sig{k} = 'ns';
+    end
+end
+
+fprintf('\n=== Significancia estadistica ===\n')
+fprintf('Zona 1 (%s): p=%.4f  %s\n', tname1, p1, sig{1})
+fprintf('Zona 2 (%s): p=%.4f  %s\n', tname2, p2, sig{2})
+fprintf('Zona 3 (%s): p=%.4f  %s\n', tname3, p3, sig{3})
+
+%% Grafico de barras estilo referencia
+figure('Position', [100 100 700 550]);
+hold on; box on;
+
+n_zonas = 3;
+x       = 1:n_zonas;
+ancho   = 0.35;
+offset  = 0.20;
+
+% Barras Control
+b1 = bar(x - offset, means_ctrl, ancho, ...
+         'FaceColor','r','FaceAlpha',0.85,'EdgeColor','k','DisplayName','UA Control');
+% Barras FGR
+b2 = bar(x + offset, means_fgr,  ancho, ...
+         'FaceColor','b','FaceAlpha',0.85,'EdgeColor','k','DisplayName','UA FGR');
+
+% Barras de error (SEM)
+errorbar(x - offset, means_ctrl, sem_ctrl, ...
+         'k.','LineWidth',1.5,'CapSize',8,'HandleVisibility','off')
+errorbar(x + offset, means_fgr,  sem_fgr, ...
+         'k.','LineWidth',1.5,'CapSize',8,'HandleVisibility','off')
+
+% Anotaciones de significancia
+y_top = max([means_ctrl + sem_ctrl, means_fgr + sem_fgr]);
+for k = 1:3
+    y_sig = max([means_ctrl(k)+sem_ctrl(k), means_fgr(k)+sem_fgr(k)]) * 1.12;
+    % Linea horizontal de significancia
+    plot([x(k)-offset, x(k)+offset], [y_sig y_sig], 'k-', ...
+         'LineWidth', 1, 'HandleVisibility','off')
+    % Simbolo
+    fs = 14;
+    if strcmp(sig{k},'ns'), fs = 11; end
+    text(x(k), y_sig * 1.03, sig{k}, ...
+         'FontSize',fs,'HorizontalAlignment','center', ...
+         'FontWeight','bold','Color','k')
+end
+
+% Ejes y etiquetas
+xticks(x)
+xticklabels({'Zone(1)','Zone(2)','Zone(3)'})
+xlabel('Stretch Intervals', 'FontSize',13)
+ylabel('Stretch Modulus ($E$, kPa)', 'FontSize',13)
+ylim([0, max([means_ctrl+sem_ctrl, means_fgr+sem_fgr])*1.25])
+legend('Location','northwest','FontSize',11)
+title('Comparisson Demiray data');
+grid on; hold off;
+exportgraphics(gcf,'Histograma_Demiray_Data.tif','Resolution',300)
+
+
+
 %N. Calcular el ajuste entre el Modelo Demiray los datos reales
 %Interpolación de Demiray en los puntos experimentales
 sigma_dem_ctrl_i = interp1(lambda_vec, sigma_dem_ctrl, lambda_ctrl,'linear',NaN);
