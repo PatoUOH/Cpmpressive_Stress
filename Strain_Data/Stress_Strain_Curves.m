@@ -1,36 +1,36 @@
-%Analisis den datos disponibles en "Demiray_Arenas-Gonzalez"
-filename = "Demiray_Arenas-Gonzalez.xlsx";
-data = readmatrix(filename, 'NumHeaderLines',1);
-
-Strain = data(:,1); %Columna 1 u.a.
-UA_Control = data(:,2:6); %Columnas 2-6 control en MPa
-UA_FGR= data(:,7:11); %Columnas 7-11 FGR en MPa
-
-figure(1);
-subplot(2,1,1);hold on;
-for i = 1:5
-plot(Strain, UA_Control(:,i),'Color','r');
-end
-hold off; grid on;
-subplot(2,1,2);hold on;
-for i = 1:5
-plot(Strain, UA_FGR(:,i),'Color','b');
-end
-hold off; grid on;
-
-%Unidades en MPa%
-%mean_control = mean(UA_Control,2); %Promedio fila a fila Control en MPa
-%mean_FGR = mean(UA_FGR,2); %Idem en MPa
-
-%Unidades en kPa%
-mean_control = mean(UA_Control,2)*1000; %Promedio fila a fila Control en MPa
-mean_FGR = mean(UA_FGR,2)*1000; %Idem en MPa
-
-
-figure(2);hold on;
-plot(Strain, mean_control,'r-s','DisplayName','UA\_Control (Mean)');
-plot(Strain,mean_FGR,'b-o','DisplayName','UA\_FGR (Mean)');
-xlabel('Strain');ylabel('Stress');legend('show','location','best');grid on; hold off;
+% %Analisis den datos disponibles en "Demiray_Arenas-Gonzalez"
+% filename = "Demiray_Arenas-Gonzalez.xlsx";
+% data = readmatrix(filename, 'NumHeaderLines',1);
+% 
+% Strain = data(:,1); %Columna 1 u.a.
+% UA_Control = data(:,2:6); %Columnas 2-6 control en MPa
+% UA_FGR= data(:,7:11); %Columnas 7-11 FGR en MPa
+% 
+% figure(1);
+% subplot(2,1,1);hold on;
+% for i = 1:5
+% plot(Strain, UA_Control(:,i),'Color','r');
+% end
+% hold off; grid on;
+% subplot(2,1,2);hold on;
+% for i = 1:5
+% plot(Strain, UA_FGR(:,i),'Color','b');
+% end
+% hold off; grid on;
+% 
+% %Unidades en MPa%
+% %mean_control = mean(UA_Control,2); %Promedio fila a fila Control en MPa
+% %mean_FGR = mean(UA_FGR,2); %Idem en MPa
+% 
+% %Unidades en kPa%
+% mean_control = mean(UA_Control,2)*1000; %Promedio fila a fila Control en MPa
+% mean_FGR = mean(UA_FGR,2)*1000; %Idem en MPa
+% 
+% 
+% figure(2);hold on;
+% plot(Strain, mean_control,'r-s','DisplayName','UA\_Control (Mean)');
+% plot(Strain,mean_FGR,'b-o','DisplayName','UA\_FGR (Mean)');
+% xlabel('Strain');ylabel('Stress');legend('show','location','best');grid on; hold off;
 
 %{
 Analisis de Resumen datos_Procesados.xlsx de Utrera. En la hoja 1 estan los parametros Demiray. Donde en la celda D2 tengo el parametro a (MPa) y en D3 tengo el parametro b (u.a.) para UA_control. Y en la celda E2 tengo el parametro a (MPa) y en E3 tengo el parametro b (u.a.) para UA_FGR.
@@ -51,6 +51,27 @@ L0_ctrl = 4.0;
 L0_fgr  = 4.0;
 A0_ctrl = 5.91;
 A0_fgr  = 5.64;
+% largo = 2.8; %mm longitud del anillo
+% rint = 0.29; %mm radio interno
+% rext = 0.447; %mm radio externo
+% 
+% %{
+% L0 es la longitud de referencia para el ensayo de anillo.
+% En tracción de anillo, L0 es la longitud de la sección recta entre los dos pins - diametro interno*2 (cada lado del anillo se estira, el auge length es 2*rint)
+% %}
+% L0 = largo;
+% %{
+% A0 es el área de la sección transversal de la pared arterial. Sección anular: a = pi*(rext^2-rint^2)
+% %}
+% 
+% A0_a = pi*(rext^2 - rint^2); %area total del tubo
+% A0 = A0_a/2;
+% 
+% L0_ctrl = L0;
+% L0_fgr  = L0;
+% A0_ctrl = A0;
+% A0_fgr  = A0;
+
 
 %1. Leer los parámetros Demiray del archivo Resumen_datos_Procesados.xlsx
 archivo = 'Resumen_datos_Procesados.xlsx';
@@ -314,7 +335,7 @@ xlabel('Stretch $(\lambda$, u.a.)',      'FontSize',13)
 ylabel('Cauchy Stress $(\sigma$, kPa)', 'FontSize',13)
 legend('Location','northwest',           'FontSize',11)
 grid on; hold off;
-exportgraphics(gcf, 'stress_strain_experimental_only.tif', 'Resolution', 300)
+%exportgraphics(gcf, 'stress_strain_experimental_only.tif', 'Resolution', 300)
 
 %Curvas Demiray
 %% 8. Modulo elastico aparente
@@ -403,7 +424,7 @@ xlabel('Stretch $(\lambda$, u.a.)',      'FontSize',13)
 ylabel('Cauchy Stress $(\sigma$, kPa)', 'FontSize',13)
 legend('Location','northwest',           'FontSize',11)
 grid on; hold off;
-exportgraphics(gcf, 'stress_strain_demiray_only.tif', 'Resolution', 300)
+%exportgraphics(gcf, 'stress_strain_demiray_only.tif', 'Resolution', 300)
 
 %% 9. Grafico de barras con error y significancia 
 % Modulo tangente local por zona — datos experimentales
@@ -514,7 +535,7 @@ ylim([0, max([means_ctrl+sem_ctrl, means_fgr+sem_fgr])*1.25])
 legend('Location','northwest','FontSize',11)
 grid on; hold off;
 title('Comparisson Experimental data');
-exportgraphics(gcf,'Histograma_Experimental_Data.tif','Resolution',300)
+%exportgraphics(gcf,'Histograma_Experimental_Data.tif','Resolution',300)
 
 
 % Modulo tangente local por zona — datos Demiray
@@ -625,82 +646,121 @@ ylim([0, max([means_ctrl+sem_ctrl, means_fgr+sem_fgr])*1.25])
 legend('Location','northwest','FontSize',11)
 title('Comparisson Demiray data');
 grid on; hold off;
-exportgraphics(gcf,'Histograma_Demiray_Data.tif','Resolution',300)
+%exportgraphics(gcf,'Histograma_Demiray_Data.tif','Resolution',300)
 
+%Primera y segunda derivada
+
+%Derivadas de Demiray y puntos de transición
+lv = lambda_vec;
+b2c = b_ctrl/2;
+b2f = b_fgr/2;
+%Primera derivada analitica (modulo tangente)
+%dsigma/dlambda = a*1000*exp(b/2*([lambda^2+2/lambda] - 3)) * [(2lambda+1/lambda^2)+(\lambda^2-1/lambda)*(b/2)*(2lambda-2/lambda^2)]
+
+dsdl_ctrl = a_ctrl*1000 .* exp(b2c.*(lv.^2+2./lv-3)) .*((2*lv + 1./lv.^2) + (lv.^2 - 1./lv).*(b2c).*(2*lv - 2./lv.^2));
+
+dsdl_fgr  = a_fgr*1000  .* exp(b2f.*(lv.^2+2./lv-3)) .*((2*lv + 1./lv.^2) + (lv.^2 - 1./lv).*(b2f).*(2*lv - 2./lv.^2));
+
+%Segunda derivada numérica sobre la primera analítica (tasa cambio)
+d2sdl2_ctrl = gradient(dsdl_ctrl,lv);
+d2sdl2_fgr = gradient(dsdl_fgr,lv);
+
+figure('Position', [100 100 1200 500]);
+subplot(121); hold on; box on;
+plot(lv, dsdl_ctrl, '-',  'Color','r','LineWidth',1,'DisplayName','UA\_Control')
+plot(lv, dsdl_fgr,  '--', 'Color','b','LineWidth',1,'DisplayName','UA\_FGR')
+xline(1.5,'k--','LineWidth',1,'HandleVisibility','off')
+xline(1.8,'k--','LineWidth',1,'HandleVisibility','off')
+xlabel('$\lambda$','FontSize',13)
+ylabel('$d\sigma/d\lambda$ (kPa)','FontSize',13)
+legend('Location','northwest','FontSize',11)
+grid on; hold off;
+
+subplot(1,2,2); hold on; box on;
+plot(lv, d2sdl2_ctrl, '-',  'Color','r','LineWidth',1,'DisplayName','UA\_Control')
+plot(lv, d2sdl2_fgr,  '--', 'Color','b','LineWidth',1,'DisplayName','UA\_FGR')
+yline(0,'k-','LineWidth',0.8,'HandleVisibility','off')
+xline(1.5,'k--','LineWidth',1,'HandleVisibility','off')
+xline(1.8,'k--','LineWidth',1,'HandleVisibility','off')
+xlim([1.0 2.0])
+xlabel('$\lambda$','FontSize',13)
+ylabel('$d^2\sigma/d\lambda^2$ (kPa)','FontSize',13)
+legend('Location','northwest','FontSize',11)
+grid on; hold off;
 
 
 %N. Calcular el ajuste entre el Modelo Demiray los datos reales
 %Interpolación de Demiray en los puntos experimentales
-sigma_dem_ctrl_i = interp1(lambda_vec, sigma_dem_ctrl, lambda_ctrl,'linear',NaN);
-sigma_dem_fgr_i = interp1(lambda_vec, sigma_dem_fgr, lambda_fgr,'linear',NaN);
-%Mascara sigma > 1 [kPa] para evitar división por cero cerca de lambda
-mk_ctrl = isfinite(sigma_dem_ctrl_i) & sigma_ctrl > 1;
-mk_fgr = isfinite(sigma_dem_fgr_i) & sigma_fgr > 1;
-%Residuos absolutos
-res_ctrl = sigma_dem_ctrl_i(mk_ctrl) - sigma_ctrl(mk_ctrl);
-res_fgr = sigma_dem_fgr_i(mk_fgr) - sigma_fgr(mk_fgr);
-%Error relativo
-err_ctrl = res_ctrl ./ sigma_ctrl(mk_ctrl)*100;
-err_fgr = res_fgr ./ sigma_fgr(mk_fgr)*100;
-%RMSE
-rmse_ctrl = sqrt(mean(res_ctrl.^2));
-rmse_fgr = sqrt(mean(res_fgr.^2));
-%r^2
-r2_ctrl = 1-sum(res_ctrl.^2)/sum((sigma_ctrl(mk_ctrl)-mean(sigma_ctrl(mk_ctrl))).^2);
-r2_fgr = 1-sum(res_fgr.^2)/sum((sigma_fgr(mk_fgr)-mean(sigma_fgr(mk_fgr))).^2);
-%Ajuste de bondad Demiray
-fprintf('UA_control: RMSE = %.2f [kPa] r^2 = %.4f\n',rmse_ctrl,r2_ctrl)
-fprintf('UA_FGR: RMSE = %.2f [kPa] r^2 = %.4f\n',rmse_fgr,r2_fgr)
-%Figure2
-%Análisis estadístico
-figure('Position',[100 100 1200 420]);
-%Residuos absolutos
-subplot(131);hold on; box on;
-plot(lambda_ctrl(mk_ctrl), res_ctrl,'.','Color','r','MarkerSize',3,'DisplayName','UA\_Control')
-plot(lambda_fgr(mk_fgr), res_fgr,'.','Color','b','MarkerSize',3,'DisplayName','UA\_FGR')
-yline(0,  'k-',  'LineWidth', 1,   'HandleVisibility', 'off')
-yline( rmse_ctrl, '--', 'Color', 'r', 'LineWidth', 0.8, 'HandleVisibility', 'off')
-yline(-rmse_ctrl, '--', 'Color', 'r', 'LineWidth', 0.8, 'HandleVisibility', 'off')
-yline( rmse_fgr,  '--', 'Color', 'b', 'LineWidth', 0.8, 'HandleVisibility', 'off')
-yline(-rmse_fgr,  '--', 'Color', 'b', 'LineWidth', 0.8, 'HandleVisibility', 'off')
-xline(1.5, 'k:', 'LineWidth', 0.8, 'HandleVisibility', 'off')
-xline(1.8, 'k:', 'LineWidth', 0.8, 'HandleVisibility', 'off')
-xlim([1.0 2.0])
-xlabel('Stretch $(\lambda)$',            'FontSize', 11)
-ylabel('$\sigma_{Dem} - \sigma_{exp}$ (kPa)', 'FontSize', 11)
-title('Residuos absolutos',              'FontSize', 11)
-legend('Location', 'northwest',          'FontSize', 9)
-grid on; hold off;
-%Error relativo
-subplot(132);hold on; box on;
-win = 80;
-err_ctrl_sm = movmean(err_ctrl,win);
-err_fgr_sm = movmean(err_fgr,win);
-plot(lambda_ctrl(mk_ctrl), err_ctrl_sm, '-', 'Color', 'r','LineWidth', 1.8, 'DisplayName', 'UA\_Control')
-plot(lambda_fgr(mk_fgr),  err_fgr_sm,  '-', 'Color','b','LineWidth', 1.8, 'DisplayName', 'UA\_FGR')
-yline( 0,  'k-',  'LineWidth', 1,   'HandleVisibility', 'off')
-yline( 20, 'k--', 'LineWidth', 0.8, 'HandleVisibility', 'off')
-yline(-20, 'k--', 'LineWidth', 0.8, 'HandleVisibility', 'off')
-xline(1.5, 'k:', 'LineWidth', 0.8,  'HandleVisibility', 'off')
-xline(1.8, 'k:', 'LineWidth', 0.8,  'HandleVisibility', 'off')
-xlim([1.0 2.0]); ylim([-80 80])
-xlabel('Stretch $(\lambda)$',  'FontSize', 11)
-ylabel('Error relativo (\%)', 'FontSize', 11)
-title('Error relativo (suavizado)', 'FontSize', 11)
-text(1.52, 70, '$\pm 20\%$', 'FontSize', 9, 'Color', [0.4 0.4 0.4])
-legend('Location', 'northeast', 'FontSize', 9)
-grid on; hold off;
-%sigma_exp vs sigma_dem
-subplot(133);hold on; box on;
-scatter(sigma_ctrl(mk_ctrl), sigma_dem_ctrl_i(mk_ctrl), 4, 'r', 'filled', 'MarkerFaceAlpha', 0.3,'DisplayName', sprintf('UA\\_Control  $R^2$=%.3f', r2_ctrl))
-scatter(sigma_fgr(mk_fgr),  sigma_dem_fgr_i(mk_fgr),  4, 'b', 'filled', 'MarkerFaceAlpha', 0.3,'DisplayName', sprintf('UA\\_FGR  $R^2$=%.3f', r2_fgr))
-lims = [0 max([sigma_ctrl(mk_ctrl); sigma_fgr(mk_fgr)])];
-plot(lims, lims, 'k-', 'LineWidth', 1.5, 'HandleVisibility', 'off')
-xlabel('$\sigma_{exp}$ (kPa)',    'FontSize', 11)
-ylabel('$\sigma_{Demiray}$ (kPa)', 'FontSize', 11)
-title('Identidad exp vs Demiray', 'FontSize', 11)
-legend('Location', 'northwest',   'FontSize', 9)
-axis equal; grid on; hold off;
-
+% sigma_dem_ctrl_i = interp1(lambda_vec, sigma_dem_ctrl, lambda_ctrl,'linear',NaN);
+% sigma_dem_fgr_i = interp1(lambda_vec, sigma_dem_fgr, lambda_fgr,'linear',NaN);
+% %Mascara sigma > 1 [kPa] para evitar división por cero cerca de lambda
+% mk_ctrl = isfinite(sigma_dem_ctrl_i) & sigma_ctrl > 1;
+% mk_fgr = isfinite(sigma_dem_fgr_i) & sigma_fgr > 1;
+% %Residuos absolutos
+% res_ctrl = sigma_dem_ctrl_i(mk_ctrl) - sigma_ctrl(mk_ctrl);
+% res_fgr = sigma_dem_fgr_i(mk_fgr) - sigma_fgr(mk_fgr);
+% %Error relativo
+% err_ctrl = res_ctrl ./ sigma_ctrl(mk_ctrl)*100;
+% err_fgr = res_fgr ./ sigma_fgr(mk_fgr)*100;
+% %RMSE
+% rmse_ctrl = sqrt(mean(res_ctrl.^2));
+% rmse_fgr = sqrt(mean(res_fgr.^2));
+% %r^2
+% r2_ctrl = 1-sum(res_ctrl.^2)/sum((sigma_ctrl(mk_ctrl)-mean(sigma_ctrl(mk_ctrl))).^2);
+% r2_fgr = 1-sum(res_fgr.^2)/sum((sigma_fgr(mk_fgr)-mean(sigma_fgr(mk_fgr))).^2);
+% %Ajuste de bondad Demiray
+% fprintf('UA_control: RMSE = %.2f [kPa] r^2 = %.4f\n',rmse_ctrl,r2_ctrl)
+% fprintf('UA_FGR: RMSE = %.2f [kPa] r^2 = %.4f\n',rmse_fgr,r2_fgr)
+% %Figure2
+% %Análisis estadístico
+% figure('Position',[100 100 1200 420]);
+% %Residuos absolutos
+% subplot(131);hold on; box on;
+% plot(lambda_ctrl(mk_ctrl), res_ctrl,'.','Color','r','MarkerSize',3,'DisplayName','UA\_Control')
+% plot(lambda_fgr(mk_fgr), res_fgr,'.','Color','b','MarkerSize',3,'DisplayName','UA\_FGR')
+% yline(0,  'k-',  'LineWidth', 1,   'HandleVisibility', 'off')
+% yline( rmse_ctrl, '--', 'Color', 'r', 'LineWidth', 0.8, 'HandleVisibility', 'off')
+% yline(-rmse_ctrl, '--', 'Color', 'r', 'LineWidth', 0.8, 'HandleVisibility', 'off')
+% yline( rmse_fgr,  '--', 'Color', 'b', 'LineWidth', 0.8, 'HandleVisibility', 'off')
+% yline(-rmse_fgr,  '--', 'Color', 'b', 'LineWidth', 0.8, 'HandleVisibility', 'off')
+% xline(1.5, 'k:', 'LineWidth', 0.8, 'HandleVisibility', 'off')
+% xline(1.8, 'k:', 'LineWidth', 0.8, 'HandleVisibility', 'off')
+% xlim([1.0 2.0])
+% xlabel('Stretch $(\lambda)$',            'FontSize', 11)
+% ylabel('$\sigma_{Dem} - \sigma_{exp}$ (kPa)', 'FontSize', 11)
+% title('Residuos absolutos',              'FontSize', 11)
+% legend('Location', 'northwest',          'FontSize', 9)
+% grid on; hold off;
+% %Error relativo
+% subplot(132);hold on; box on;
+% win = 80;
+% err_ctrl_sm = movmean(err_ctrl,win);
+% err_fgr_sm = movmean(err_fgr,win);
+% plot(lambda_ctrl(mk_ctrl), err_ctrl_sm, '-', 'Color', 'r','LineWidth', 1.8, 'DisplayName', 'UA\_Control')
+% plot(lambda_fgr(mk_fgr),  err_fgr_sm,  '-', 'Color','b','LineWidth', 1.8, 'DisplayName', 'UA\_FGR')
+% yline( 0,  'k-',  'LineWidth', 1,   'HandleVisibility', 'off')
+% yline( 20, 'k--', 'LineWidth', 0.8, 'HandleVisibility', 'off')
+% yline(-20, 'k--', 'LineWidth', 0.8, 'HandleVisibility', 'off')
+% xline(1.5, 'k:', 'LineWidth', 0.8,  'HandleVisibility', 'off')
+% xline(1.8, 'k:', 'LineWidth', 0.8,  'HandleVisibility', 'off')
+% xlim([1.0 2.0]); ylim([-80 80])
+% xlabel('Stretch $(\lambda)$',  'FontSize', 11)
+% ylabel('Error relativo (\%)', 'FontSize', 11)
+% title('Error relativo (suavizado)', 'FontSize', 11)
+% text(1.52, 70, '$\pm 20\%$', 'FontSize', 9, 'Color', [0.4 0.4 0.4])
+% legend('Location', 'northeast', 'FontSize', 9)
+% grid on; hold off;
+% %sigma_exp vs sigma_dem
+% subplot(133);hold on; box on;
+% scatter(sigma_ctrl(mk_ctrl), sigma_dem_ctrl_i(mk_ctrl), 4, 'r', 'filled', 'MarkerFaceAlpha', 0.3,'DisplayName', sprintf('UA\\_Control  $R^2$=%.3f', r2_ctrl))
+% scatter(sigma_fgr(mk_fgr),  sigma_dem_fgr_i(mk_fgr),  4, 'b', 'filled', 'MarkerFaceAlpha', 0.3,'DisplayName', sprintf('UA\\_FGR  $R^2$=%.3f', r2_fgr))
+% lims = [0 max([sigma_ctrl(mk_ctrl); sigma_fgr(mk_fgr)])];
+% plot(lims, lims, 'k-', 'LineWidth', 1.5, 'HandleVisibility', 'off')
+% xlabel('$\sigma_{exp}$ (kPa)',    'FontSize', 11)
+% ylabel('$\sigma_{Demiray}$ (kPa)', 'FontSize', 11)
+% title('Identidad exp vs Demiray', 'FontSize', 11)
+% legend('Location', 'northwest',   'FontSize', 9)
+% axis equal; grid on; hold off;
+% 
 
 
