@@ -2,7 +2,7 @@
 %cd /Users/patricio/Desktop/Doctorado/Dr.Krause/DatosAbstract/
 
 Datos_UAGenerical = 'Demiray_Arenas-Gonzalez.xlsx';
-Strain = readtable(Datos_UAGenerical, 'Range', 'A2:A67');
+Strain = readtable(Datos_UAGenerical, 'Sheet','Umbilicales', 'Range', 'A2:A67');
 
 %Stress UA normal
 Stress_UAN1 = readtable(Datos_UAGenerical, 'Range', 'B2:B67');
