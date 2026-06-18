@@ -99,12 +99,12 @@ lambda_fgr  = (L0_fgr  + disp_fgr)  ./ L0_fgr;
 sigma_ctrl  = (fuerza_ctrl ./ A0_ctrl) .* lambda_ctrl * 1000;  % [kPa]
 sigma_fgr   = (fuerza_fgr  ./ A0_fgr)  .* lambda_fgr  * 1000;  % [kPa]
 
-fprintf('\nλ_max ctrl=%.3f,  λ_max fgr=%.3f\n', max(lambda_ctrl), max(lambda_fgr))
+%fprintf('\nλ_max ctrl=%.3f,  λ_max fgr=%.3f\n', max(lambda_ctrl), max(lambda_fgr))
 
 %4. Modelo Demiray
 % Utrera, ec. 2.8: b/2 en el exponente
 % σ = a*(λ²-1/λ) * exp(b/2*(λ²+2/λ-3))
-lambda_vec = linspace(1.0, 2.0, 1000);
+lambda_vec = linspace(1.0, 2.0, 100);
 
 sigma_dem_ctrl = a_ctrl .* (lambda_vec.^2 - 1./lambda_vec) .* exp((b_ctrl/2) .* (lambda_vec.^2 + 2./lambda_vec - 3)) * 1000;  % [kPa]
 
@@ -123,14 +123,25 @@ sigma_dem_fgr  = a_fgr  .* (lambda_vec.^2 - 1./lambda_vec) .* exp((b_fgr/2)  .* 
 N = 20;
 lambda_ctrl_idx = 1:N:length(lambda_ctrl);
 lambda_fgr_idx = 1:N:length(lambda_fgr);
+
+sd_sigma_ctrl = std(sigma_ctrl);
+sd_sigma_fgr = std(sigma_fgr);
+
 figure('Position', [100 100 850 580]);
 hold on; box on;
 %Plot datos reales
 plot(lambda_ctrl(lambda_ctrl_idx), sigma_ctrl(lambda_ctrl_idx), 'o-', 'Color', 'r', 'DisplayName', 'UA\_Control (exp)')
 plot(lambda_fgr(lambda_fgr_idx),  sigma_fgr(lambda_fgr_idx),  's-', 'Color', 'b', 'DisplayName', 'UA\_FGR (exp)')
+
+%SD error
+errorbar(lambda_ctrl(lambda_ctrl_idx),sigma_ctrl(lambda_ctrl_idx),sd_sigma_ctrl* ones(size(lambda_ctrl_idx)),'Color','r','LineStyle','none','HandleVisibility','off');
+
+errorbar(lambda_fgr(lambda_fgr_idx),sigma_fgr(lambda_fgr_idx),sd_sigma_fgr* ones(size(lambda_fgr_idx)),'Color','b','LineStyle','none','HandleVisibility','off');
+
 %Plot Modelo Demiray
 plot(lambda_vec, sigma_dem_ctrl, '-',  'Color', 'r','DisplayName', 'UA\_Control (Demiray)')
 plot(lambda_vec, sigma_dem_fgr,  '--', 'Color', 'b','DisplayName', 'UA\_FGR (Demiray)')
+
 
 %Zonas de interés (Z1: sub-estiramiento; Z2: fisiológico; Z3: sobre-estiramiento)
 xline(1.5, 'k--', 'LineWidth', 1,'HandleVisibility','off'); xline(1.8, 'k--', 'LineWidth', 1,'HandleVisibility','off') %Zone1: [1-1.4); Zone2: [1.5-1.8); Zone3: [1.8-2)
@@ -300,7 +311,7 @@ figure('Position', [100 100 1800 800]);
 hold on; box on;
 
 % Curvas Demiray unicamente
-plot(lambda_, sigma_dem_ctrl, 'o-',  'Color','r','LineWidth',1,'DisplayName','UA\_Control (Demiray)')
+plot(lambda_vec, sigma_dem_ctrl, 'o-',  'Color','r','LineWidth',1,'DisplayName','UA\_Control (Demiray)')
 plot(lambda_vec, sigma_dem_fgr,  's-', 'Color','b','LineWidth',1,'DisplayName','UA\_FGR (Demiray)')
 
 % Rectas secantes Demiray (punteado negro)
@@ -385,8 +396,8 @@ E.fgr_dem  = [get_E(lambda_vec, sigma_dem_fgr,  z(1), z(2)), ...
 [lv_z,sv_z]=subzona(lambda_vec,sigma_dem_fgr, z(3),z(4)); [E3fd,S3fd]=calc_E(lv_z,sv_z);
 
 %% Grafico — solo Demiray
-figure('Position', [100 100 1800 800]);
-hold on; box on;
+%figure('Position', [100 100 1800 800]);
+figure;hold on; box on;
 
 % Curvas Demiray unicamente
 plot(lambda_vec, sigma_dem_ctrl, 'o-',  'Color','r','LineWidth',1,'DisplayName','UA\_Control (Demiray)')
@@ -402,29 +413,29 @@ for k = 1:3
 end
 
 % Lineas de zona
-xline(1.5,'k--','LineWidth',1,'HandleVisibility','off');
-xline(1.8,'k--','LineWidth',1,'HandleVisibility','off');
+xline(1.5,'k.-','LineWidth',0.5,'HandleVisibility','off');
+xline(1.8,'k.-','LineWidth',0.5,'HandleVisibility','off');
 
 % Etiquetas zona
 % Zone 1
-text(1.22, -30,  'Zone(1)', 'FontSize',12)
-text(1.22, -52,  sprintf('$E_{Dem}^{ctrl}$=%.0f$\\pm$%.0f kPa', E1cd,S1cd), 'FontSize',12,'Color','r')
-text(1.22, -75,  sprintf('$E_{Dem}^{FGR}$=%.0f$\\pm$%.0f kPa',  E1fd,S1fd), 'FontSize',12,'Color','b')
+text(1.22, -30,  'Zone(1)', 'FontSize',10)
+text(1.22, -52,  sprintf('$E_{Dem}^{ctrl}$=%.0f$\\pm$%.0f kPa', E1cd,S1cd), 'FontSize',9,'Color','r')
+text(1.22, -75,  sprintf('$E_{Dem}^{FGR}$=%.0f$\\pm$%.0f kPa',  E1fd,S1fd), 'FontSize',9,'Color','b')
 % Zone 2
-text(1.62, -30,  'Zone(2)', 'FontSize',12)
-text(1.62, -52,  sprintf('$E_{Dem}^{ctrl}$=%.0f$\\pm$%.0f kPa', E2cd,S2cd), 'FontSize',12,'Color','r')
-text(1.62, -75,  sprintf('$E_{Dem}^{FGR}$=%.0f$\\pm$%.0f kPa',  E2fd,S2fd), 'FontSize',12,'Color','b')
+text(1.55, -30,  'Zone(2)', 'FontSize',10)
+text(1.55, -52,  sprintf('$E_{Dem}^{ctrl}$=%.0f$\\pm$%.0f kPa', E2cd,S2cd), 'FontSize',9,'Color','r')
+text(1.55, -75,  sprintf('$E_{Dem}^{FGR}$=%.0f$\\pm$%.0f kPa',  E2fd,S2fd), 'FontSize',9,'Color','b')
 % Zone 3
-text(1.82, -30,  'Zone(3)', 'FontSize',12)
-text(1.82, -52,  sprintf('$E_{Dem}^{ctrl}$=%.0f$\\pm$%.0f kPa', E3cd,S3cd), 'FontSize',12,'Color','r')
-text(1.82, -75,  sprintf('$E_{Dem}^{FGR}$=%.0f$\\pm$%.0f kPa',  E3fd,S3fd), 'FontSize',12,'Color','b')
+text(1.82, -30,  'Zone(3)', 'FontSize',10)
+text(1.82, -52,  sprintf('$E_{Dem}^{ctrl}$=%.0f$\\pm$%.0f kPa', E3cd,S3cd), 'FontSize',9,'Color','r')
+text(1.82, -75,  sprintf('$E_{Dem}^{FGR}$=%.0f$\\pm$%.0f kPa',  E3fd,S3fd), 'FontSize',9,'Color','b')
 
 xlim([1.0 2.0]); ylim([-100 300])
 xlabel('Stretch $(\lambda$, u.a.)',      'FontSize',13)
 ylabel('Cauchy Stress $(\sigma$, kPa)', 'FontSize',13)
 legend('Location','northwest',           'FontSize',11)
 grid on; hold off;
-%exportgraphics(gcf, 'stress_strain_demiray_only.tif', 'Resolution', 300)
+exportgraphics(gcf, 'stress_strain_demiray_only.tif', 'Resolution', 300)
 
 %% 9. Grafico de barras con error y significancia 
 % Modulo tangente local por zona — datos experimentales
@@ -689,6 +700,8 @@ legend('Location','northwest','FontSize',11)
 grid on; hold off;
 
 
+
+
 %N. Calcular el ajuste entre el Modelo Demiray los datos reales
 %Interpolación de Demiray en los puntos experimentales
 % sigma_dem_ctrl_i = interp1(lambda_vec, sigma_dem_ctrl, lambda_ctrl,'linear',NaN);
@@ -761,6 +774,6 @@ grid on; hold off;
 % title('Identidad exp vs Demiray', 'FontSize', 11)
 % legend('Location', 'northwest',   'FontSize', 9)
 % axis equal; grid on; hold off;
-% 
+
 
 

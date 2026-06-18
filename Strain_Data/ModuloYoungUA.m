@@ -34,10 +34,10 @@ Stress_UAFGR5 = Stress_UAFGR5{:,1};
 %Promedio y el error estándar para Stress_UAN y Stress_UAFGR
 %%%%%%%%%%%Segunda parte inicio%%%%%%%%%%%%%%%
 Mean_Stress_UAN = mean([Stress_UAN1, Stress_UAN2, Stress_UAN3, Stress_UAN4, Stress_UAN5], 2);
-SE_Stress_UAN = std([Stress_UAN1, Stress_UAN2, Stress_UAN3, Stress_UAN4, Stress_UAN5], 0, 2) / sqrt(5);
+SE_Stress_UAN = std([Stress_UAN1, Stress_UAN2, Stress_UAN3, Stress_UAN4, Stress_UAN5], 0, 2);
 
 Mean_Stress_UAFGR = mean([Stress_UAFGR1, Stress_UAFGR2, Stress_UAFGR3, Stress_UAFGR4, Stress_UAFGR5], 2);
-SE_Stress_UAFGR = std([Stress_UAFGR1, Stress_UAFGR2, Stress_UAFGR3, Stress_UAFGR4, Stress_UAFGR5], 0, 2) / sqrt(5);
+SE_Stress_UAFGR = std([Stress_UAFGR1, Stress_UAFGR2, Stress_UAFGR3, Stress_UAFGR4, Stress_UAFGR5], 0, 2);
 %%%%%%%%%%%Segunda parte finakl%%%%%%%%%%%%%%%
 
 
