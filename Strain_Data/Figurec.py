@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.stats import ttest_ind, ttest_rel, mannwhitneyu, friedmanchisquare, wilcoxon
-from statsmodels.stats.diagnostic import lilliefors
+from statsmodels.stats.diagnostic import lilliefors 
 
 STEEL_BLUE = '#6C91B6'   # active curve (left axis) -- matches palette_neutral_soft.py COLORS['steel_blue']
 CORAL = '#DC867F'        # passive curve (right axis) -- matches palette_neutral_soft.py COLORS['coral']
@@ -198,8 +198,11 @@ def run_pipeline(archivo=ARCHIVO):
     ax_right.set_ylabel(r'Passive Stress ($\sigma_{p}$, kPa)', fontsize=14, color=CORAL)
     ax_right.tick_params(axis='y', colors=CORAL)
     ax_right.spines['right'].set_color(CORAL)
-    ax_left.axvline(1.451, ls='--', color='k', linewidth=0.5)
-    ax_left.axvline(1.845, ls='--', color='k', linewidth=0.5)
+    # Shortened to stop at the active curve (instead of spanning the full axis height).
+    zone_bound_lams = [1.451, 1.845]
+    zone_bound_y = np.interp(zone_bound_lams, grid_act_ext, sigma_mean_act_ext)
+    for lam_b, y_b in zip(zone_bound_lams, zone_bound_y):
+        ax_left.vlines(lam_b, 0, y_b, ls='--', color='k', linewidth=0.5)
 
     # ---- Mark, on the passive curve, the same lambda where the active curve peaks ----
     # This is the biomechanical anchor for the physiological substrate stiffness choice
@@ -215,9 +218,9 @@ def run_pipeline(archivo=ARCHIVO):
     ax_right.plot(lam_opt, sigma_p_at_peak, marker='*', color=CORAL, markeredgecolor='k',
                   markersize=14, zorder=5)
     ax_left.plot([lam_opt, lam_opt], [sigma_a_peak, 0], ls=':', color='0.4', linewidth=0.9, zorder=1)
-    ax_right.annotate(f'$\\lambda_{{opt}}={lam_opt:.2f}$\n$\\sigma_p={sigma_p_at_peak:.0f}$ kPa',
+    ax_right.annotate(f'$\\mathbf{{\\lambda_{{opt}}}}=\\mathbf{{ {lam_opt:.2f} }}$\n$\\mathbf{{\\sigma_p}}=\\mathbf{{ {sigma_p_at_peak:.0f} }}$ kPa',
                       xy=(lam_opt, sigma_p_at_peak), xytext=(lam_opt + 0.06, sigma_p_at_peak - 35),
-                      fontsize=11, color=CORAL,
+                      fontsize=10, fontweight='bold', color=CORAL,
                       arrowprops=dict(arrowstyle='-', color=CORAL, lw=0.8))
 
     print(f'\nActive peak: lambda_opt = {lam_opt:.3f}, sigma_a_peak = {sigma_a_peak:.2f} kPa')
@@ -438,13 +441,12 @@ def run_pipeline(archivo=ARCHIVO):
 
     friedman_p_str = f'{friedman_p:.3f}' if not np.isnan(friedman_p) else 'n/a'
     str_box = (
-        f'Zone modulus ($E$, kPa), $n$={n_complete}\n'
+        f'Zone modulus ($\\mathbf{{E}}$, kPa), $\\mathbf{{n}}$={n_complete}\n'
         f'  Zone 1: {E_prom_ctrl_fit[0]:.1f} [{E_prom_ctrl_fit[0]-err_lower_ctrl[0]:.1f}, {E_prom_ctrl_fit[0]+err_upper_ctrl[0]:.1f}]\n'
         f'  Zone 2: {E_prom_ctrl_fit[1]:.1f} [{E_prom_ctrl_fit[1]-err_lower_ctrl[1]:.1f}, {E_prom_ctrl_fit[1]+err_upper_ctrl[1]:.1f}]\n'
         f'  Zone 3: {E_prom_ctrl_fit[2]:.1f} [{E_prom_ctrl_fit[2]-err_lower_ctrl[2]:.1f}, {E_prom_ctrl_fit[2]+err_upper_ctrl[2]:.1f}]\n'
-        f'  Friedman omnibus: $p$={friedman_p_str}'
     )
-    ax2.text(0.03, 0.80, str_box, transform=ax2.transAxes, fontsize=9.5,
+    ax2.text(0.03, 0.80, str_box, transform=ax2.transAxes, fontsize=11, fontweight='bold',
              bbox=dict(facecolor=(0.98, 0.98, 0.98), edgecolor='k'), verticalalignment='top')
     
 
