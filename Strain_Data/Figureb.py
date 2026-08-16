@@ -142,7 +142,7 @@ ax = fig.add_axes([AX_LEFT_IN / FIG_W, AX_BOTTOM_IN / FIG_H, AX_W_IN / FIG_W, AX
 # tops out at ~2.0 mm -- vs. ~0.9 mm under the old single-L0=1mm placeholder).
 XMIN = 0.0
 XMAX = max(lam_to_mm(lam_i, L0_i).max() for _, lam_i, _, L0_i in SPECIMENS)
-YMIN, YMAX = 0.0, 20.0
+YMIN, YMAX = 0.0, 15.0
 # Raising this (without touching YMAX) compresses the active curve into a
 # smaller fraction of the fixed-height axes box, and frees up vertical room
 # (in inches) for the ring schematics above it -- same trick as Figure A.
@@ -159,10 +159,10 @@ ax.spines['left'].set_bounds(YMIN, YMAX)
 ax.spines['bottom'].set_bounds(XMIN, XMAX)
 
 ax.set_xticks(np.linspace(XMIN, XMAX, 6))
-ax.set_yticks([0, 5, 10, 15, 20])
+ax.set_yticks([0, 5, 10, 15])
 # Numeric tick labels shown on request (previously hidden).
 ax.set_xticklabels([f'{v:.2f}' for v in np.linspace(XMIN, XMAX, 6)])
-ax.set_yticklabels([f'{v:.0f}' for v in [0, 5, 10, 15, 20]])
+ax.set_yticklabels([f'{v:.0f}' for v in [0, 5, 10, 15]])
 
 ax.set_xlabel(r'$\Delta L$ [mm]', fontsize=11)
 ax.set_ylabel(r'$F$ [mN]', fontsize=11)
@@ -177,8 +177,12 @@ ax.yaxis.set_label_coords(-0.085, y_label_frac)
 
 # ---------------- vertical centre (data y) of the ring schematics, and the
 # height of the "Zone 1/2/3" labels underneath them. ----------------
-ring_cy = 23.15
-zone_label_y = 20.1  # same physical gap below ring_cy as Figure A's Zone labels
+# Whole schematic block (rings, arrows, pins, zone labels, and the legend
+# column, which is positioned relative to ring_cy/ring_top) lowered on request
+# so it sits just above the new YMAX=15 (previously anchored just above 20).
+SCHEMATIC_Y_SHIFT = -4.0
+ring_cy = 23.15 + SCHEMATIC_Y_SHIFT
+zone_label_y = 20.1 + SCHEMATIC_Y_SHIFT  # same physical gap below ring_cy as Figure A's Zone labels
 
 # Shift applied (in lambda-space, then converted to mm) to Zone 2/Zone 3's ring
 # positions. (Originally shared with the two dashed threshold lines, which
