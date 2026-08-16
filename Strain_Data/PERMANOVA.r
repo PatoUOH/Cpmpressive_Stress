@@ -38,7 +38,6 @@ library(shinyWidgets)
 library(htmltools)
 library(igraph)
 library(colourpicker)
-library(patchwork)
 
 # -----------------------------------------------------------------------------
 # File upload size limit (1000 MB)
@@ -304,7 +303,6 @@ ui <- dashboardPage(
             numericInput("pcaFontSize", "Base font size", value = 12, min = 8, max = 24),
             checkboxInput("pcaBold", "Bold axes labels", value = FALSE),
             numericInput("pcaWidth", "Plot width (pixels)", value = 800, min = 400, max = 2000),
-            checkboxInput("pcaAddInset", "Add Betadisper inset (PCoA)", value = FALSE),
             numericInput("pcaHeight", "Plot height (pixels)", value = 600, min = 400, max = 2000),
             actionButton("generatePca", "Generate PCA", class = "btn-primary")
           ),
@@ -375,22 +373,6 @@ ui <- dashboardPage(
 # ==============================================================================
 
 server <- function(input, output, session) {
-  
-  # --- Función auxiliar para colores por defecto (Neutral Soft) ---
-  # --- Función auxiliar para colores por defecto (Neutral Soft) ---
-  get_custom_color <- function(group_name) {
-    g <- toupper(as.character(group_name))
-    
-    # HUAEC en tonos Rojo Coral
-    if (grepl("HUAEC", g) && (grepl("4GPA", g) || grepl("HIGH", g))) return("#C65350")
-    if (grepl("HUAEC", g) && (grepl("64KPA", g) || grepl("LOW", g))) return("#DC867F")
-    
-    # HUVEC en tonos Steel Blue
-    if (grepl("HUVEC", g) && (grepl("4GPA", g) || grepl("HIGH", g))) return("#25508F")
-    if (grepl("HUVEC", g) && (grepl("64KPA", g) || grepl("LOW", g))) return("#6C91B6")
-    
-    return("#808080") # Color gris de contingencia
-  }
   
   # ----------------------------------------------------------------------------
   # Reactive values
@@ -527,7 +509,7 @@ server <- function(input, output, session) {
   })
   
   # ----------------------------------------------------------------------------
-  # Preprocessing
+  # Preprocessing (modified: added logit transformation)
   # ----------------------------------------------------------------------------
   
   observeEvent(input$applyFilter, {
@@ -597,7 +579,9 @@ server <- function(input, output, session) {
       } else if (transform == "logcpm") {
         trans <- cpm(mat, log = TRUE, prior.count = 1)
       } else if (transform == "logit") {
+        # M-values for methylation beta values
         eps <- 1e-6
+        # Clamp values to avoid log(0) or log(Inf)
         if (any(mat < 0, na.rm = TRUE) || any(mat > 1, na.rm = TRUE)) {
           showNotification("Data contains values outside [0,1]; logit transformation may be invalid for methylation beta values.", type = "warning")
         }
@@ -637,7 +621,7 @@ server <- function(input, output, session) {
   })
   
   # ----------------------------------------------------------------------------
-  # Dimensionality Reduction
+  # Dimensionality Reduction (unchanged)
   # ----------------------------------------------------------------------------
   
   observeEvent(input$runDimRed, {
@@ -675,11 +659,7 @@ server <- function(input, output, session) {
           dist_obj <- as.dist(1 - cos_sim(mat))
         }
       } else {
-        if (dist_method == "bray") {
-          dist_obj <- vegan::vegdist(t(mat), method = "bray")
-        } else {
-          dist_obj <- dist(t(mat), method = dist_method)
-        }
+        dist_obj <- dist(t(mat), method = dist_method)
       }
     }
     
@@ -794,7 +774,6 @@ server <- function(input, output, session) {
     }
     
     if (input$dimHull && length(unique(coords$Color)) > 1) {
-      # -> CORRECCIÓN: Uso de dplyr::slice
       hulls <- coords %>% group_by(Color) %>% dplyr::slice(chull(Dim1, Dim2))
       p <- p + geom_polygon(data = hulls, aes(fill = Color), alpha = 0.1, show.legend = FALSE)
     }
@@ -823,7 +802,7 @@ server <- function(input, output, session) {
   })
   
   # ----------------------------------------------------------------------------
-  # PERMANOVA
+  # PERMANOVA (unchanged)
   # ----------------------------------------------------------------------------
   
   observeEvent(input$runPermanova, {
@@ -915,8 +894,6 @@ server <- function(input, output, session) {
           }
           d <- as.dist(1 - cos_sim(mat))
         }
-      } else if (dist_method %in% c("bray", "bray-curtis", "bray_curtis")) {
-        d <- vegan::vegdist(t(mat), method = "bray")
       } else {
         d <- dist(t(mat), method = dist_method)
       }
@@ -1059,7 +1036,7 @@ server <- function(input, output, session) {
   })
   
   # ----------------------------------------------------------------------------
-  # Assumptions (betadisper)
+  # Assumptions (betadisper) - unchanged
   # ----------------------------------------------------------------------------
   
   observeEvent(input$runBetadisper, {
@@ -1106,8 +1083,6 @@ server <- function(input, output, session) {
         }
         d <- as.dist(1 - cos_sim(mat))
       }
-    } else if (dist_method %in% c("bray", "bray-curtis", "bray_curtis")) {
-      d <- vegan::vegdist(t(mat), method = "bray")
     } else {
       d <- dist(t(mat), method = dist_method)
     }
@@ -1148,7 +1123,6 @@ server <- function(input, output, session) {
         stringsAsFactors = FALSE
       )
       
-      # -> CORRECCIÓN: Uso de dplyr::slice
       hull_data <- df_pts %>%
         group_by(Group) %>%
         dplyr::slice(chull(PCoA1, PCoA2)) %>%
@@ -1164,16 +1138,16 @@ server <- function(input, output, session) {
           return(col)
         })
         if (any(sapply(color_map, is.null))) {
-          # -> CORRECCIÓN: Asignar colores por defecto Neutral Soft
-          default_colors <- sapply(grupos, get_custom_color)
+          default_colors <- RColorBrewer::brewer.pal(min(length(grupos), 8), "Set1")
+          if (length(grupos) > 8) default_colors <- viridis::viridis(length(grupos))
           names(default_colors) <- grupos
           color_map <- default_colors
         } else {
           names(color_map) <- grupos
         }
       } else {
-        # -> CORRECCIÓN: Asignar colores por defecto Neutral Soft
-        default_colors <- sapply(grupos, get_custom_color)
+        default_colors <- RColorBrewer::brewer.pal(min(length(grupos), 8), "Set1")
+        if (length(grupos) > 8) default_colors <- viridis::viridis(length(grupos))
         names(default_colors) <- grupos
         color_map <- default_colors
       }
@@ -1231,7 +1205,7 @@ server <- function(input, output, session) {
   )
   
   # ----------------------------------------------------------------------------
-  # Integrated PCA
+  # Integrated PCA (unchanged)
   # ----------------------------------------------------------------------------
   
   output$pcaColorInputs <- renderUI({
@@ -1244,12 +1218,14 @@ server <- function(input, output, session) {
     grupos <- grupos[!is.na(grupos)]
     if (length(grupos) == 0) return(helpText("No groups in selected variable."))
     
-    # -> CORRECCIÓN: Asignar colores Neutral Soft por defecto a la interfaz
+    default_colors <- RColorBrewer::brewer.pal(min(length(grupos), 8), "Set1")
+    if (length(grupos) > 8) default_colors <- viridis::viridis(length(grupos))
+    
     input_list <- lapply(seq_along(grupos), function(i) {
       colourpicker::colourInput(
         inputId = paste0("pca_color_", grupos[i]),
         label = grupos[i],
-        value = get_custom_color(grupos[i])
+        value = default_colors[i]
       )
     })
     do.call(tagList, input_list)
@@ -1262,12 +1238,14 @@ server <- function(input, output, session) {
     grupos <- grupos[!is.na(grupos)]
     if (length(grupos) == 0) return()
     
-    # -> CORRECCIÓN: Resetear colores a la paleta Neutral Soft
+    default_colors <- RColorBrewer::brewer.pal(min(length(grupos), 8), "Set1")
+    if (length(grupos) > 8) default_colors <- viridis::viridis(length(grupos))
+    
     for (i in seq_along(grupos)) {
       colourpicker::updateColourInput(
         session, 
         inputId = paste0("pca_color_", grupos[i]), 
-        value = get_custom_color(grupos[i])
+        value = default_colors[i]
       )
     }
     showNotification("Colors reset to default.", type = "message")
@@ -1374,75 +1352,6 @@ server <- function(input, output, session) {
                         hjust = -0.1, vjust = 1.1, size = input$pcaFontSize/3, color = "gray40")
     }
     
-    # ---- INSET BETADISPER (Patchwork) ----
-    if (input$pcaAddInset) {
-      # 1. Obtener la métrica desde la pestaña Dimensionality Reduction
-      dist_method <- input$distMethod
-      
-      # 2. Calcular la distancia dinámicamente según la selección
-      d_inset <- NULL
-      if (dist_method %in% c("pearson", "spearman", "kendall", "cosine")) {
-        if (dist_method == "pearson") d_inset <- as.dist(1 - cor(mat, method = "pearson"))
-        else if (dist_method == "spearman") d_inset <- as.dist(1 - cor(mat, method = "spearman"))
-        else if (dist_method == "kendall") d_inset <- as.dist(1 - cor(mat, method = "kendall"))
-        else if (dist_method == "cosine") {
-          cos_sim <- function(x) {
-            x <- t(x)
-            sim <- x %*% t(x) / (sqrt(rowSums(x^2)) %*% t(sqrt(rowSums(x^2))))
-            sim
-          }
-          d_inset <- as.dist(1 - cos_sim(mat))
-        }
-      } else if (dist_method %in% c("bray", "bray-curtis", "bray_curtis")) {
-        mat_raw <- (2^mat) - 1 # Deshacer logaritmo temporalmente solo si es Bray-Curtis
-        d_inset <- vegan::vegdist(t(mat_raw), method = "bray")
-      } else {
-        d_inset <- dist(t(mat), method = dist_method)
-      }
-      
-      # 3. Calcular betadisper con la métrica dinámica
-      betad <- betadisper(d_inset, meta[[color_var]])
-      
-      # 4. Preparar coordenadas
-      df_pts <- data.frame(
-        PCoA1 = betad$vectors[,1], 
-        PCoA2 = betad$vectors[,2], 
-        Group = meta[[color_var]]
-      )
-      
-      df_cent <- data.frame(
-        PCoA1 = betad$centroids[,1], 
-        PCoA2 = betad$centroids[,2], 
-        Group = rownames(betad$centroids)
-      )
-      
-      # 5. Calcular los bordes de los 4 polígonos
-      hull_data <- df_pts %>%
-        group_by(Group) %>%
-        dplyr::slice(chull(PCoA1, PCoA2)) %>%
-        ungroup()
-        
-      # 6. Generar el gráfico del Inset (Forzando límites de ejes)
-      p_inset <- ggplot(df_pts, aes(x = PCoA1, y = PCoA2, color = Group)) +
-        geom_polygon(data = hull_data, aes(fill = Group), alpha = 0.2, linewidth = 0.5, show.legend = FALSE) +
-        geom_point(size = 1.5, show.legend = FALSE) +
-        geom_point(data = df_cent, size = 3, shape = 4, stroke = 1.2, show.legend = FALSE) +
-        scale_color_manual(values = color_map) +
-        scale_fill_manual(values = color_map) +
-        labs(x = "PCoA1", y = "PCoA2") +
-        coord_cartesian(xlim = c(-1.0, 0.5), ylim = c(-0.5, 0.5)) +
-        theme_classic(base_size = 9) +
-        theme(
-          plot.background = element_rect(fill = "transparent", color = NA),
-          panel.background = element_rect(fill = "transparent", color = NA), # Fondo transparente y sin bordes
-          axis.text = element_text(color = "black", size = 7),
-          axis.title = element_text(color = "black", face = "bold", size = 8)
-        )
-      
-      # 7. Pegar el inset en el PCA principal (esquina inferior derecha)
-      p <- p + inset_element(p_inset, left = 0.65, bottom = 0.01, right = 1.00, top = 0.45)
-    }
-
     values$pcaPlot <- p
     output$pcaIntegratedPlot <- renderPlot({
       p
