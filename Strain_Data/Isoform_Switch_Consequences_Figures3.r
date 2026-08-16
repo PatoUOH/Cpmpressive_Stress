@@ -39,6 +39,7 @@ ui <- fluidPage(
       selectInput("color_palette", "Color Palette Preset",
                   choices = c(
                     "Neutral Soft (Figura)" = "neutral_soft",
+                    "HUAEC vs HUVEC (64 kPa)" = "huaec_huvec_64kpa",
                     "Personalizado (Manual)" = "custom",
                     "Nature Communications" = "nature",
                     "Cell" = "cell",
@@ -175,6 +176,17 @@ server <- function(input, output, session){
         point_intersect = "#5B84B1", # Azul suave
         line_connect = "#5B84B1",
         bar_prop = "#689D91",        # Verde azulado suave
+        shade1 = "#F3F5F7",
+        shade2 = "#FFFFFF"
+      ))
+    } else if(palette == "huaec_huvec_64kpa") {
+      # Lavender (PaletteNeutralSoft.py) as a single accent color throughout,
+      # for the HUAEC vs HUVEC 64 kPa comparison.
+      return(list(
+        bar_dIF = "#A28FC5",
+        point_intersect = "#A28FC5",
+        line_connect = "#A28FC5",
+        bar_prop = "#A28FC5",
         shade1 = "#F3F5F7",
         shade2 = "#FFFFFF"
       ))

@@ -1423,7 +1423,7 @@ server <- function(input, output, session) {
         dplyr::slice(chull(PCoA1, PCoA2)) %>%
         ungroup()
         
-      # 6. Generar el gráfico del Inset (Forzando límites de ejes)
+      # 6. Generar el gráfico del Inset (Escala automática de ejes)
       p_inset <- ggplot(df_pts, aes(x = PCoA1, y = PCoA2, color = Group)) +
         geom_polygon(data = hull_data, aes(fill = Group), alpha = 0.2, linewidth = 0.5, show.legend = FALSE) +
         geom_point(size = 1.5, show.legend = FALSE) +
@@ -1431,7 +1431,6 @@ server <- function(input, output, session) {
         scale_color_manual(values = color_map) +
         scale_fill_manual(values = color_map) +
         labs(x = "PCoA1", y = "PCoA2") +
-        coord_cartesian(xlim = c(-1.0, 0.5), ylim = c(-0.5, 0.5)) +
         theme_classic(base_size = 9) +
         theme(
           plot.background = element_rect(fill = "transparent", color = NA),

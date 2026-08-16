@@ -489,4 +489,3 @@ def run_pipeline(archivo=ARCHIVO):
 if __name__ == '__main__':
     results = run_pipeline()
     print('\nSaved: FigureC_active_vs_passive.pdf/.png, FigureD_zone_modulus.pdf/.png')
-    plt.show()
